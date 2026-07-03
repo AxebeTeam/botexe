@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title %> - MPBot</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <%- include('../partials/sidebar', { currentPage: 'protection' }) %>
+
+  <% if (query && query.saved) { %>
+    <div class="alert alert-success">Protection settings saved successfully!</div>
+  <% } %>
+  <% if (query && query.error) { %>
+    <div class="alert alert-error">An error occurred while saving protection settings.</div>
+  <% } %>
+
+  <div class="page-header">
+    <div class="page-header-info">
+      <% if (guild.icon) { %><img src="<%= guild.icon %>" class="guild-icon"><% } %>
+      <div>
+        <h1>Protection</h1>
+        <span class="guild-name"><%= guild.name %></span>
+      </div>
+    </div>
+  </div>
+
+  <form method="POST" action="/customer/guild/<%= guild.id %>/protection/save">
+    <div class="card">
+      <div class="card-header">
+        <h2 class="card-title">Anti-Spam</h2>
+      </div>
+      <div class="card-body">
+        <p>Block repeated messages and prevent spam in your server.</p>
+        <div class="toggle-item">
+          <label class="toggle-group">
+            <input type="checkbox" name="anti_spam" <%= config.anti_spam ? 'checked' : '' %>>
+            <span>Enable Anti-Spam</span>
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <h2 class="card-title">Anti-Links</h2>
+      </div>
+      <div class="card-body">
+        <p>Delete messages containing URLs and links.</p>
+        <div class="toggle-item">
+          <label class="toggle-group">
+            <input type="checkbox" name="anti_links" <%= config.anti_links ? 'checked' : '' %>>
+            <span>Enable Anti-Links</span>
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <h2 class="card-title">Anti-CAPS</h2>
+      </div>
+      <div class="card-body">
+        <p>Block messages with excessive capital letters.</p>
+        <div class="toggle-item">
+          <label class="toggle-group">
+            <input type="checkbox" name="anti_caps" <%= config.anti_caps ? 'checked' : '' %>>
+            <span>Enable Anti-CAPS</span>
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <h2 class="card-title">Anti-Raid</h2>
+      </div>
+      <div class="card-body">
+        <p>Automatically detect and act against rapid joins or mass join events.</p>
+        <div class="toggle-item">
+          <label class="toggle-group">
+            <input type="checkbox" name="anti_raid" <%= config.anti_raid ? 'checked' : '' %>>
+            <span>Enable Anti-Raid</span>
+          </label>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Raid Limit (joins per 10s)</label>
+            <input type="number" name="raid_limit" value="<%= config.raid_limit || 5 %>" min="1">
+          </div>
+          <div class="form-group">
+            <label>Raid Action</label>
+            <select name="raid_action">
+              <option value="warn" <%= config.raid_action === 'warn' ? 'selected' : '' %>>Warn</option>
+              <option value="kick" <%= config.raid_action === 'kick' ? 'selected' : '' %>>Kick</option>
+              <option value="ban" <%= config.raid_action === 'ban' ? 'selected' : '' %>>Ban</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <h2 class="card-title">Anti-Phishing</h2>
+      </div>
+      <div class="card-body">
+        <p>Detect and block known phishing links and scam URLs.</p>
+        <div class="toggle-item">
+          <label class="toggle-group">
+            <input type="checkbox" name="anti_phishing" <%= config.anti_phishing ? 'checked' : '' %>>
+            <span>Enable Anti-Phishing</span>
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <h2 class="card-title">Anti-Alt Accounts</h2>
+      </div>
+      <div class="card-body">
+        <p>Restrict or flag accounts that are too new.</p>
+        <div class="toggle-item">
+          <label class="toggle-group">
+            <input type="checkbox" name="anti_alt" <%= config.anti_alt ? 'checked' : '' %>>
+            <span>Enable Anti-Alt Accounts</span>
+          </label>
+        </div>
+        <div class="form-group">
+          <label>Max Account Age (hours)</label>
+          <input type="number" name="alt_age_hours" value="<%= config.alt_age_hours || 24 %>" min="1">
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <h2 class="card-title">Punishment Action</h2>
+      </div>
+      <div class="card-body">
+        <p>Default punishment to apply when a protection rule is triggered.</p>
+        <div class="form-group">
+          <select name="punishment">
+            <option value="warn" <%= config.punishment === 'warn' ? 'selected' : '' %>>Warn</option>
+            <option value="mute" <%= config.punishment === 'mute' ? 'selected' : '' %>>Mute</option>
+            <option value="kick" <%= config.punishment === 'kick' ? 'selected' : '' %>>Kick</option>
+            <option value="ban" <%= config.punishment === 'ban' ? 'selected' : '' %>>Ban</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <h2 class="card-title">Bypass Roles</h2>
+      </div>
+      <div class="card-body">
+        <p>Role IDs that will be ignored by protection checks. One ID per line.</p>
+        <div class="form-group">
+          <textarea name="bypass_roles" rows="5"><% if (config.bypass_roles) { %><%= Array.isArray(config.bypass_roles) ? config.bypass_roles.join('\n') : config.bypass_roles %><% } %></textarea>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <h2 class="card-title">Log Channel</h2>
+      </div>
+      <div class="card-body">
+        <p>Channel ID where protection actions and detections will be logged.</p>
+        <div class="form-group">
+          <input type="text" name="log_channel" value="<%= config.log_channel || '' %>" placeholder="Channel ID">
+        </div>
+      </div>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Save Protection Settings</button>
+  </form>
+  </main>
+</div>
+</body>
+</html>

@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title %> - MPBot</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<%- include('../partials/sidebar', { currentPage: 'automod' }) %>
+
+    <% if (query && query.saved) { %>
+      <div class="alert alert-success">✅ AutoMod settings saved!</div>
+    <% } %>
+
+    <div class="page-header">
+      <div style="display:flex;align-items:center;gap:1rem;">
+        <% if (guild.icon) { %><img src="<%= guild.icon %>" style="width:40px;height:40px;border-radius:50%;"><% } %>
+        <h1>AutoMod - <%= guild.name %></h1>
+      </div>
+    </div>
+
+    <form method="POST" action="/customer/guild/<%= guild.id %>/automod/save">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">🛡️ Toggles</div>
+        </div>
+        <div class="toggle-item">
+          <label class="toggle-group">
+            <input type="checkbox" name="anti_spam" <%= config.anti_spam ? 'checked' : '' %>>
+            <span>Anti-Spam — Block repeated messages</span>
+          </label>
+        </div>
+        <div class="toggle-item">
+          <label class="toggle-group">
+            <input type="checkbox" name="anti_links" <%= config.anti_links ? 'checked' : '' %>>
+            <span>Block Links — Delete messages containing URLs</span>
+          </label>
+        </div>
+        <div class="toggle-item">
+          <label class="toggle-group">
+            <input type="checkbox" name="anti_caps" <%= config.anti_caps ? 'checked' : '' %>>
+            <span>Anti-CAPS — Block messages with too many capitals</span>
+          </label>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">📝 Blocked Words</div>
+        </div>
+        <div class="form-group">
+          <div class="hint">One word per line</div>
+          <textarea name="bad_words" rows="6"><% try { %><%= JSON.parse(config.bad_words || '[]').join('\n') %><% } catch {} %></textarea>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">📋 Log Channel</div>
+        </div>
+        <div class="form-group">
+          <div class="hint">Channel ID where AutoMod actions will be logged</div>
+          <input type="text" name="log_channel" value="<%= config.log_channel || '' %>" placeholder="Channel ID" style="width:300px;">
+        </div>
+      </div>
+
+      <button type="submit" class="btn btn-primary">Save AutoMod Settings</button>
+    </form>
+  </main>
+</div>
+</body>
+</html>

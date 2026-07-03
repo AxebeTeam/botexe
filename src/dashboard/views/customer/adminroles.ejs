@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title %> - MPBot</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <style>
+    .perm-card { background:var(--bg-input);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1rem;margin-bottom:.75rem; }
+    .perm-card.limited { border-left:3px solid var(--green); }
+    .perm-card.moderate { border-left:3px solid var(--orange); }
+    .perm-card.full { border-left:3px solid var(--red); }
+    .perm-label { font-weight:600;font-size:.9rem; }
+    .perm-desc { font-size:.78rem;color:var(--text-muted);margin-top:.2rem; }
+  </style>
+</head>
+<body>
+<%- include('../partials/sidebar', { currentPage: 'admin-roles' }) %>
+
+    <div class="main-header">
+      <div>
+        <h1>👑 Admin Roles</h1>
+        <div class="breadcrumb"><%= guild.name %> / <span>Permission Tiers</span></div>
+      </div>
+    </div>
+
+    <% if (query && query.saved) { %>
+      <div class="alert alert-success">✅ Admin role saved!</div>
+    <% } %>
+    <% if (query && query.error) { %>
+      <div class="alert alert-error">❌ Invalid role ID or permission level.</div>
+    <% } %>
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">➕ Add Admin Role</div>
+      </div>
+      <p class="card-desc">Assign permission tiers to specific roles. Members with these roles will have the corresponding bot permissions.</p>
+
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:.75rem;margin-bottom:1.5rem;">
+        <div class="perm-card limited">
+          <div class="perm-label">🟢 Limited</div>
+          <div class="perm-desc">Basic moderation: warn, mute, clear messages. Can't ban or kick.</div>
+        </div>
+        <div class="perm-card moderate">
+          <div class="perm-label">🟡 Moderate</div>
+          <div class="perm-desc">Standard admin: kick, ban, manage channels, manage settings.</div>
+        </div>
+        <div class="perm-card full">
+          <div class="perm-label">🔴 Full</div>
+          <div class="perm-desc">Full access: everything except server ownership transfer.</div>
+        </div>
+      </div>
+
+      <form method="POST" action="/customer/guild/<%= guild.id %>/admin-roles/save">
+        <div class="form-row" style="grid-template-columns:2fr 1fr;">
+          <div class="form-group">
+            <label>Role ID</label>
+            <input type="text" name="role_id" placeholder="Paste the role ID" required>
+          </div>
+          <div class="form-group">
+            <label>Permission Level</label>
+            <select name="permission_level">
+              <option value="limited">🟢 Limited</option>
+              <option value="moderate">🟡 Moderate</option>
+              <option value="full">🔴 Full</option>
+            </select>
+          </div>
+        </div>
+        <button type="submit" class="btn btn-primary">Add Admin Role</button>
+      </form>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">👑 Configured Admin Roles</div>
+        <span style="font-size:.8rem;color:var(--text-muted);"><%= adminRoles.length %> roles</span>
+      </div>
+      <% if (adminRoles.length > 0) { %>
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead>
+              <tr><th>Role ID</th><th>Permission Level</th><th>Actions</th></tr>
+            </thead>
+            <tbody>
+              <% adminRoles.forEach(r => { %>
+                <tr>
+                  <td><code><%= r.role_id %></code></td>
+                  <td>
+                    <% if (r.permission_level === 'limited') { %><span class="badge badge-active">🟢 Limited</span><% } %>
+                    <% if (r.permission_level === 'moderate') { %><span class="badge badge-warning">🟡 Moderate</span><% } %>
+                    <% if (r.permission_level === 'full') { %><span class="badge badge-danger">🔴 Full</span><% } %>
+                  </td>
+                  <td>
+                    <form method="POST" action="/customer/guild/<%= guild.id %>/admin-roles/delete/<%= r.role_id %>" onsubmit="return confirm('Remove this admin role?')" style="display:inline;">
+                      <button type="submit" class="btn btn-sm btn-danger">Remove</button>
+                    </form>
+                  </td>
+                </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
+      <% } else { %>
+        <div class="empty-state">
+          <div class="empty-icon">👑</div>
+          <h3>No Admin Roles Configured</h3>
+          <p>Add roles above to grant them specific permission levels in the bot. Server Owner always has full access.</p>
+        </div>
+      <% } %>
+    </div>
+
+  </main>
+</div>
+</body>
+</html>

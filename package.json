@@ -1,0 +1,35 @@
+{
+  "name": "multipurpose-bot",
+  "version": "1.0.0",
+  "description": "Multi-purpose Discord bot with key system & dashboard",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc && xcopy /E /I /Y /Q \"src\\dashboard\\views\" \"dist\\dashboard\\views\\\" && xcopy /E /I /Y /Q \"src\\dashboard\\public\" \"dist\\dashboard\\public\\\"",
+    "start": "node dist/index.js",
+    "dev": "ts-node src/index.ts",
+    "register": "ts-node src/bot/handlers/registerCommands.ts"
+  },
+  "dependencies": {
+    "axios": "^1.7.9",
+    "bcryptjs": "^2.4.3",
+    "better-sqlite3": "^11.7.0",
+    "discord.js": "^14.18.0",
+    "dotenv": "^16.4.7",
+    "ejs": "^3.1.10",
+    "express": "^4.21.2",
+    "express-session": "^1.18.1",
+    "uuid": "^11.1.0"
+  },
+  "devDependencies": {
+    "@types/bcryptjs": "^2.4.6",
+    "@types/better-sqlite3": "^7.6.12",
+    "@types/ejs": "^3.1.5",
+    "@types/express": "^5.0.0",
+    "@types/express-session": "^1.18.1",
+    "@types/node": "^22.13.0",
+    "@types/uuid": "^10.0.0",
+    "copyfiles": "^2.4.1",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.7.3"
+  }
+}

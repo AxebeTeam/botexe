@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title %> - MPBot</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <style>
+    .subtab { display:flex;gap:0.5rem;margin-bottom:1.5rem;border-bottom:1px solid var(--border);padding-bottom:0.5rem; }
+    .subtab button { background:none;border:none;color:var(--text-muted);padding:0.5rem 1rem;cursor:pointer;border-radius:var(--radius-sm);font-size:0.9rem; }
+    .subtab button.active { background:var(--bg-input);color:var(--text); }
+    .panel-box { background:var(--bg-input);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1rem;margin-bottom:1rem; }
+    .option-row { display:flex;gap:0.5rem;align-items:center;margin-bottom:0.5rem;flex-wrap:wrap; }
+    .option-row input { background:var(--bg-card);border:1px solid var(--border);border-radius:6px;padding:0.4rem 0.6rem;color:var(--text); }
+    .option-row input[type=text] { flex:1;min-width:80px; }
+  </style>
+</head>
+<body>
+  <%- include('../partials/sidebar', { currentPage: 'reaction-roles' }) %>
+
+    <% if (query && query.saved) { %>
+      <div class="alert-success">Saved!</div>
+    <% } %>
+    <% if (query && query.error) { %>
+      <div class="alert-error"><%= query.error %></div>
+    <% } %>
+
+    <div class="page-header">
+      <div style="display:flex;align-items:center;gap:1rem;">
+        <% if (guild.icon) { %><img src="<%= guild.icon %>" style="width:40px;height:40px;border-radius:50%;"><% } %>
+        <h1>Reaction Roles - <%= guild.name %></h1>
+      </div>
+    </div>
+
+    <div class="subtab">
+      <button class="active" onclick="switchSubTab('reaction',this)">Reaction Roles</button>
+      <button onclick="switchSubTab('dropdown',this)">Role Dropdowns</button>
+    </div>
+
+    <!-- Traditional Reaction Roles -->
+    <div id="sub-reaction" class="card">
+      <div class="card-header">
+        <h2 class="card-title">Add Reaction Role</h2>
+      </div>
+      <p style="color:#8b949e;margin-bottom:1rem;">Members get/remove a role by reacting to a message with an emoji.</p>
+      <form method="POST" action="/customer/guild/<%= guild.id %>/reaction-roles/save">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+          <div>
+            <label style="display:block;color:#8b949e;font-size:0.85rem;">Channel ID</label>
+            <input type="text" name="channel_id" placeholder="Channel ID" required style="width:100%;">
+          </div>
+          <div>
+            <label style="display:block;color:#8b949e;font-size:0.85rem;">Message ID</label>
+            <input type="text" name="message_id" placeholder="Message ID" required style="width:100%;">
+          </div>
+          <div>
+            <label style="display:block;color:#8b949e;font-size:0.85rem;">Role ID</label>
+            <input type="text" name="role_id" placeholder="Role ID" required style="width:100%;">
+          </div>
+          <div>
+            <label style="display:block;color:#8b949e;font-size:0.85rem;">Emoji</label>
+            <input type="text" name="emoji" placeholder="e.g. ✅ or 👍" required style="width:100%;">
+          </div>
+        </div>
+        <button type="submit" class="btn btn-primary" style="margin-top:1rem;">Add Reaction Role</button>
+      </form>
+
+      <% if (rrs.length > 0) { %>
+        <div class="table-container" style="margin-top:1.5rem;">
+          <table class="data-table">
+            <thead><tr><th>Channel</th><th>Message</th><th>Role</th><th>Emoji</th><th>Actions</th></tr></thead>
+            <tbody>
+              <% rrs.forEach(r => { %>
+                <tr>
+                  <td><code><%= r.channel_id.substring(0,10) %>..</code></td>
+                  <td><code><%= r.message_id.substring(0,10) %>..</code></td>
+                  <td><code><%= r.role_id.substring(0,10) %>..</code></td>
+                  <td><span style="font-size:1.3rem;"><%= r.emoji %></span></td>
+                  <td>
+                    <form method="POST" action="/customer/guild/<%= guild.id %>/reaction-roles/delete/<%= r.id %>" onsubmit="return confirm('Delete?')">
+                      <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+                    </form>
+                  </td>
+                </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
+      <% } else { %>
+        <p style="color:#8b949e;margin-top:1.5rem;">No reaction roles configured.</p>
+      <% } %>
+    </div>
+
+    <!-- Role Dropdown Panels -->
+    <div id="sub-dropdown" class="card" style="display:none;">
+      <div class="card-header">
+        <h2 class="card-title">Role Dropdown Panels</h2>
+      </div>
+      <p style="color:#8b949e;margin-bottom:1rem;">Create a select-menu dropdown where members can pick roles. Supports single or multiple selection.</p>
+
+      <form method="POST" action="/customer/guild/<%= guild.id %>/role-panels/save">
+        <div class="panel-box">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem;">
+            <div>
+              <label style="display:block;color:#8b949e;font-size:0.85rem;">Panel Title</label>
+              <input type="text" name="title" value="Pick a Role" style="width:100%;">
+            </div>
+            <div>
+              <label style="display:block;color:#8b949e;font-size:0.85rem;">Placeholder Text</label>
+              <input type="text" name="placeholder" value="Choose a role..." style="width:100%;">
+            </div>
+          </div>
+          <div class="form-group">
+            <label style="color:#8b949e;font-size:0.85rem;">Description</label>
+            <input type="text" name="description" value="Select a role from the dropdown below." style="width:100%;">
+          </div>
+          <div class="form-group">
+            <label style="color:#8b949e;font-size:0.85rem;">Max Selections</label>
+            <select name="max_select" style="width:120px;">
+              <option value="1">Single (1)</option>
+              <option value="2">2</option>
+              <option value="3">3</option>
+              <option value="5">5</option>
+              <option value="10">10</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="panel-box">
+          <h3 style="margin-bottom:0.5rem;">Role Options</h3>
+          <p style="color:#8b949e;font-size:0.85rem;margin-bottom:1rem;">Each option = a role members can select. Add one option per line below.</p>
+          <div id="roleOptionEditor">
+            <div class="option-row">
+              <input type="text" name="role_id" placeholder="Role ID" style="min-width:200px;">
+              <input type="text" name="label" placeholder="Label" style="min-width:120px;">
+              <input type="text" name="description" placeholder="Description (optional)" style="min-width:150px;">
+              <input type="text" name="emoji" placeholder="Emoji" style="width:60px;text-align:center;">
+            </div>
+          </div>
+          <button type="button" class="btn btn-sm btn-ghost" onclick="addOptionRow()" style="margin-top:0.5rem;">+ Add Option</button>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Save & Preview Panel</button>
+      </form>
+
+      <% if (panels.length > 0) { %>
+        <div style="margin-top:1.5rem;">
+          <h3>Saved Panels</h3>
+          <% panels.forEach(p => { %>
+            <div class="panel-box" style="display:flex;justify-content:space-between;align-items:center;">
+              <div>
+                <strong><%= p.title %></strong>
+                <span style="color:#8b949e;font-size:0.85rem;margin-left:1rem;"><%= p.description %></span>
+                <span class="badge badge-active" style="margin-left:0.5rem;"><%= p.max_select %> max</span>
+                <% if (p.channel_id) { %><span class="badge badge-inactive" style="margin-left:0.3rem;">Sent</span><% } %>
+              </div>
+              <div style="display:flex;gap:0.5rem;">
+                <form method="POST" action="/customer/guild/<%= guild.id %>/role-panels/send/<%= p.id %>" style="display:inline;">
+                  <input type="text" name="channel_id" placeholder="Channel ID" required style="width:180px;padding:0.3rem 0.5rem;font-size:0.85rem;">
+                  <button type="submit" class="btn btn-sm btn-success">Send</button>
+                </form>
+                <form method="POST" action="/customer/guild/<%= guild.id %>/role-panels/delete/<%= p.id %>" onsubmit="return confirm('Delete this panel?')" style="display:inline;">
+                  <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+                </form>
+              </div>
+            </div>
+          <% }) %>
+        </div>
+      <% } else { %>
+        <p style="color:#8b949e;margin-top:1rem;">No dropdown panels created yet.</p>
+      <% } %>
+    </div>
+
+  </main>
+</div>
+
+  <script>
+    function switchSubTab(tab, btn) {
+      document.querySelectorAll('.subtab button').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('sub-reaction').style.display = tab === 'reaction' ? 'block' : 'none';
+      document.getElementById('sub-dropdown').style.display = tab === 'dropdown' ? 'block' : 'none';
+    }
+
+    function addOptionRow() {
+      const editor = document.getElementById('roleOptionEditor');
+      const row = document.createElement('div');
+      row.className = 'option-row';
+      row.innerHTML = `
+        <input type="text" name="role_id" placeholder="Role ID" style="min-width:200px;">
+        <input type="text" name="label" placeholder="Label" style="min-width:120px;">
+        <input type="text" name="description" placeholder="Description (optional)" style="min-width:150px;">
+        <input type="text" name="emoji" placeholder="Emoji" style="width:60px;text-align:center;">
+        <button type="button" class="btn btn-sm btn-danger" onclick="this.parentElement.remove()" style="flex-shrink:0;">✕</button>
+      `;
+      editor.appendChild(row);
+    }
+  </script>
+</body>
+</html>

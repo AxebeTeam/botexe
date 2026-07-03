@@ -1,0 +1,76 @@
+<div class="app-layout">
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <h2>MPBot</h2>
+      <small>Multi-Purpose Bot</small>
+    </div>
+
+    <div class="sidebar-user">
+      <div class="avatar">
+        <% if (user?.avatar) { %><img src="<%= user.avatar %>" alt=""><% } else { %><%= (user?.username || '?')[0].toUpperCase() %><% } %>
+      </div>
+      <div class="user-info">
+        <div class="user-name"><%= user?.global_name || user?.username || 'User' %></div>
+        <div class="user-tag"><%= user?.id ? '@' + user.id.slice(0,8) + '..' : '' %></div>
+      </div>
+    </div>
+
+    <div class="server-selector">
+      <select onchange="if(this.value)window.location='/customer/guild/'+this.value">
+        <option value="">— Server Quick Switch —</option>
+        <% var sidebarGuilds = typeof locals.sidebarGuilds !== 'undefined' ? locals.sidebarGuilds : (typeof guilds !== 'undefined' ? guilds : []); %>
+          <% if (sidebarGuilds && sidebarGuilds.length > 0) { %>
+            <% sidebarGuilds.forEach(g => { %>
+            <option value="<%= g.id %>" <%= typeof guild !== 'undefined' && guild && g.id === guild.id ? 'selected' : '' %>><%= g.name %></option>
+          <% }) %>
+        <% } %>
+      </select>
+    </div>
+
+    <nav class="sidebar-nav">
+      <div class="nav-section">Overview</div>
+      <a href="/customer/dashboard" class="<%= currentPage === 'dashboard' ? 'active' : '' %>">
+        <span class="nav-icon">📊</span> Dashboard
+      </a>
+
+      <% if (typeof guild !== 'undefined' && guild) { %>
+        <div class="nav-section" style="margin-top:.8rem;"><%= guild.name %></div>
+        <a href="/customer/guild/<%= guild.id %>" class="<%= currentPage === 'server' ? 'active' : '' %>">
+          <span class="nav-icon">⚙️</span> Overview
+        </a>
+        <a href="/customer/guild/<%= guild.id %>/commands" class="<%= currentPage === 'commands' ? 'active' : '' %>">
+          <span class="nav-icon">🔧</span> Commands
+        </a>
+        <a href="/customer/guild/<%= guild.id %>/automod" class="<%= currentPage === 'automod' ? 'active' : '' %>">
+          <span class="nav-icon">🛡️</span> AutoMod
+        </a>
+        <a href="/customer/guild/<%= guild.id %>/protection" class="<%= currentPage === 'protection' ? 'active' : '' %>">
+          <span class="nav-icon">🔒</span> Protection
+        </a>
+        <a href="/customer/guild/<%= guild.id %>/tickets" class="<%= currentPage === 'tickets' ? 'active' : '' %>">
+          <span class="nav-icon">🎫</span> Tickets
+        </a>
+        <a href="/customer/guild/<%= guild.id %>/reaction-roles" class="<%= currentPage === 'reaction-roles' ? 'active' : '' %>">
+          <span class="nav-icon">🎭</span> Roles
+        </a>
+        <a href="/customer/guild/<%= guild.id %>/suggestions" class="<%= currentPage === 'suggestions' ? 'active' : '' %>">
+          <span class="nav-icon">💡</span> Suggestions
+        </a>
+        <a href="/customer/guild/<%= guild.id %>/admin-roles" class="<%= currentPage === 'admin-roles' ? 'active' : '' %>">
+          <span class="nav-icon">👑</span> Admin Roles
+        </a>
+        <a href="/customer/guild/<%= guild.id %>/leveling" class="<%= currentPage === 'leveling' ? 'active' : '' %>">
+          <span class="nav-icon">📈</span> Leveling
+        </a>
+        <a href="/customer/guild/<%= guild.id %>/shop" class="<%= currentPage === 'shop' ? 'active' : '' %>">
+          <span class="nav-icon">🛒</span> Shop
+        </a>
+      <% } %>
+    </nav>
+
+    <div class="sidebar-footer">
+      <a href="/customer/logout"><span>🚪</span> Logout</a>
+    </div>
+  </aside>
+
+  <main class="main-content">

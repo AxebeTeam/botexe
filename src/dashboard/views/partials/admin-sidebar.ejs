@@ -1,0 +1,44 @@
+<div class="app-layout">
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <h2>MPBot</h2>
+      <small>Admin Panel</small>
+    </div>
+
+    <div class="sidebar-user">
+      <div class="avatar">👑</div>
+      <div class="user-info">
+        <div class="user-name">Administrator</div>
+        <div class="user-tag"><%= user?.username || 'admin' %></div>
+      </div>
+    </div>
+
+    <nav class="sidebar-nav">
+      <div class="nav-section">Main</div>
+      <a href="/" class="<%= currentPage === 'dashboard' ? 'active' : '' %>">
+        <span class="nav-icon">📊</span> Dashboard
+      </a>
+      <a href="/keys" class="<%= currentPage === 'keys' ? 'active' : '' %>">
+        <span class="nav-icon">🔑</span> Keys
+      </a>
+      <a href="/servers" class="<%= currentPage === 'servers' ? 'active' : '' %>">
+        <span class="nav-icon">💻</span> Servers
+      </a>
+      <a href="/servers/lookup" class="<%= currentPage === 'lookup' ? 'active' : '' %>">
+        <span class="nav-icon">🔍</span> User Lookup
+      </a>
+      <a href="/commands" class="<%= currentPage === 'commands' ? 'active' : '' %>">
+        <span class="nav-icon">🔧</span> Commands
+      </a>
+      <div class="nav-section" style="margin-top:.8rem;">Customer</div>
+      <a href="/customer/dashboard">
+        <span class="nav-icon">👥</span> Customer Portal
+      </a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <a href="/logout"><span>🚪</span> Logout</a>
+    </div>
+  </aside>
+
+  <main class="main-content">

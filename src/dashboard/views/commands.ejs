@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title %> - MPBot Dashboard</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <%- include('partials/admin-sidebar', { currentPage: 'commands' }) %>
+
+    <div class="main-header">
+      <div class="breadcrumb">
+        <a href="/">Dashboard</a>
+        <span>/</span>
+        <span>Commands</span>
+      </div>
+      <h1><%= title %></h1>
+    </div>
+
+    <% if (query && query.error) { %>
+      <div class="alert alert-error">
+        <%= query.error === 'no_client' ? 'Bot client is not available. Make sure the bot is running.' : query.error === 'sync_failed' ? 'Failed to sync commands: ' + decodeURIComponent(query.msg || '') : query.error === 'no_message' ? 'Please enter a message.' : query.error === 'broadcast_failed' ? 'Broadcast failed.' : query.error === 'no_commands' ? 'No commands found on disk.' : query.error === 'reload_failed' ? 'Failed to reload commands.' : 'An error occurred.' %>
+      </div>
+    <% } %>
+    <% if (query && query.success) { %>
+      <div class="alert alert-success">
+        <%= query.success === 'synced' ? 'Commands synced! Global: ' + (query.global || '0') + ' commands | Guilds: ' + (query.guildCount || '0') + ' servers updated (' + (query.guilds || '0') + ' commands each)' : query.success === 'reloaded' ? 'Commands reloaded from disk! (' + (query.count || '') + ' commands loaded)' : query.success === 'broadcast' ? 'Broadcast sent! Sent: ' + (query.sent || '0') + ', Failed: ' + (query.failed || '0') : 'Done!' %>
+      </div>
+    <% } %>
+
+    <div class="card-grid-2">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Sync Slash Commands</div>
+        </div>
+        <p class="card-desc">Reloads commands from disk, registers globally <strong>and</strong> instantly syncs to all servers the bot is in. Use after adding, removing, or editing commands.</p>
+        <form method="POST" action="/commands/sync" onsubmit="this.querySelector('button').disabled=true;this.querySelector('button').textContent='Working...'">
+          <button type="submit" class="btn btn-primary btn-block"> Sync & Register Commands</button>
+        </form>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Reload Commands Only</div>
+        </div>
+        <p class="card-desc">Just reload commands from disk without registering to Discord. Useful for testing.</p>
+        <form method="POST" action="/commands/reload" onsubmit="this.querySelector('button').disabled=true;this.querySelector('button').textContent='Reloading...'">
+          <button type="submit" class="btn btn-warning btn-block"> Reload Commands</button>
+        </form>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">🔄 Fix Duplicate Commands</div>
+      </div>
+      <p class="card-desc">Remove all global commands and re-sync only to guilds. This fixes the duplicate commands issue (commands showing twice in Discord).</p>
+      <form method="POST" action="/commands/fix-duplicates" onsubmit="this.querySelector('button').disabled=true;this.querySelector('button').textContent='Fixing...'">
+        <button type="submit" class="btn btn-warning btn-block">🔧 Fix Duplicates (Remove Global)</button>
+      </form>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">Broadcast Message</div>
+      </div>
+      <p class="card-desc">Send a message to all servers the bot is in. The message will be sent as an embed to the system channel.</p>
+      <form method="POST" action="/commands/broadcast">
+        <div class="form-group">
+          <textarea name="message" rows="4" placeholder="Enter your broadcast message..." required></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary btn-block"> Send Broadcast</button>
+      </form>
+    </div>
+
+  </main>
+</div>
+</body>
+</html>

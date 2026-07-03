@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title %> - MPBot Dashboard</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <%- include('partials/admin-sidebar', { currentPage: 'dashboard' }) %>
+
+  <div class="main-header">
+    <div class="page-header">
+      <div class="breadcrumb">
+        <a href="/">Home</a>
+        <span>/</span>
+        <span>Dashboard</span>
+      </div>
+      <h1>Dashboard Overview</h1>
+    </div>
+  </div>
+
+  <div class="stats-row">
+    <div class="stat-card">
+      <div class="stat-icon bg-purple">🔑</div>
+      <div class="stat-body">
+        <div class="stat-value"><%= totalKeys %></div>
+        <div class="stat-label">Total Keys</div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon bg-green">✅</div>
+      <div class="stat-body">
+        <div class="stat-value"><%= activeKeys %></div>
+        <div class="stat-label">Active Keys</div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon bg-orange">💤</div>
+      <div class="stat-body">
+        <div class="stat-value"><%= unassignedKeys %></div>
+        <div class="stat-label">Unassigned Keys</div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon bg-red">❌</div>
+      <div class="stat-body">
+        <div class="stat-value"><%= expiredKeys %></div>
+        <div class="stat-label">Expired Keys</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="stats-row">
+    <div class="stat-card">
+      <div class="stat-icon bg-blue">💻</div>
+      <div class="stat-body">
+        <div class="stat-value"><%= totalGuilds %></div>
+        <div class="stat-label">Servers</div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon bg-red">📊</div>
+      <div class="stat-body">
+        <div class="stat-value"><%= totalWarnings %></div>
+        <div class="stat-label">Warnings</div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon bg-cyan">🛡️</div>
+      <div class="stat-body">
+        <div class="stat-value"><%= guildsWithAutomod %></div>
+        <div class="stat-label">AutoMod Configs</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="stats-row">
+    <div class="stat-card">
+      <div class="stat-icon bg-blue">🎫</div>
+      <div class="stat-body">
+        <div class="stat-value"><%= openTickets %> / <%= totalTickets %></div>
+        <div class="stat-label">Tickets Open/Total</div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon bg-purple">🎉</div>
+      <div class="stat-body">
+        <div class="stat-value"><%= activeGiveaways %> / <%= totalGiveaways %></div>
+        <div class="stat-label">Giveaways Active/Total</div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon bg-green">💰</div>
+      <div class="stat-body">
+        <div class="stat-value"><%= economyUsers %></div>
+        <div class="stat-label">Economy Users</div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon bg-orange">📈</div>
+      <div class="stat-body">
+        <div class="stat-value"><%= leveledUsers %></div>
+        <div class="stat-label">Leveled Users</div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon bg-cyan">🎭</div>
+      <div class="stat-body">
+        <div class="stat-value"><%= totalReactionRoles %></div>
+        <div class="stat-label">Reaction Roles</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <h3 class="card-title">Quick Actions</h3>
+    </div>
+    <div class="action-grid">
+      <a href="/keys" class="server-card">
+        <h3>🔑 Manage Keys</h3>
+        <p>Create, extend, delete keys. Assign keys to servers.</p>
+      </a>
+      <a href="/servers" class="server-card">
+        <h3>💻 Manage Servers</h3>
+        <p>View connected servers, assign keys, deactivate, extend.</p>
+      </a>
+      <a href="/servers/lookup" class="server-card">
+        <h3>🔍 User Lookup</h3>
+        <p>Search users by ID, find what servers they are in.</p>
+      </a>
+    </div>
+  </div>
+
+  </main>
+</div>
+</body>
+</html>

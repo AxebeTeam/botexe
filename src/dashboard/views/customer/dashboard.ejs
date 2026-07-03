@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title %> - MPBot</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<%- include('../partials/sidebar', { currentPage: 'dashboard' }) %>
+
+    <div class="main-header">
+      <div>
+        <h1>Dashboard</h1>
+        <div class="breadcrumb">Overview / <span>My Servers</span></div>
+      </div>
+      <div class="header-actions">
+        <span style="font-size:.85rem;color:var(--text-secondary);display:flex;align-items:center;gap:.5rem;">
+          <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--green);"></span>
+          <%= guilds.length %> servers
+        </span>
+      </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-icon purple">📊</div>
+        <div class="stat-body">
+          <div class="stat-value"><%= guilds.length %></div>
+          <div class="stat-label">My Servers</div>
+        </div>
+        <span class="stat-trend up">+<%= guilds.length %></span>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon blue">👥</div>
+        <div class="stat-body">
+          <div class="stat-value"><%= guilds.reduce((a,g) => a + (g.memberCount||0), 0) %></div>
+          <div class="stat-label">Total Members</div>
+        </div>
+        <span class="stat-trend up">Active</span>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon green">✅</div>
+        <div class="stat-body">
+          <div class="stat-value"><%= guilds.filter(g => g.owner).length %></div>
+          <div class="stat-label">Owned Servers</div>
+        </div>
+        <span class="stat-trend up">Owner</span>
+      </div>
+    </div>
+
+    <% if (guilds.length === 0) { %>
+      <div class="card" style="padding:3rem;text-align:center;">
+        <div class="empty-state">
+          <div class="empty-icon">🤖</div>
+          <h3>No Servers Found</h3>
+          <p>The bot is not in any of your servers. Make sure you have added the bot to a server first, then refresh.</p>
+        </div>
+      </div>
+    <% } else { %>
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">📋 My Servers</div>
+          <span style="font-size:.8rem;color:var(--text-muted);"><%= guilds.length %> total</span>
+        </div>
+        <div class="server-grid">
+          <% guilds.forEach(g => { %>
+            <a href="/customer/guild/<%= g.id %>" class="server-card" style="text-decoration:none;color:inherit;display:block;">
+              <div class="server-icon">
+                <% if (g.icon) { %><img src="<%= g.icon %>" alt=""><% } else { %><%= g.name.charAt(0) %><% } %>
+              </div>
+              <div class="server-name"><%= g.name %></div>
+              <div class="server-meta">
+                <span>👥 <%= g.memberCount || '?' %></span>
+                <% if (g.owner) { %><span class="badge badge-active">Owner</span><% } %>
+              </div>
+            </a>
+          <% }) %>
+        </div>
+      </div>
+    <% } %>
+
+  </main>
+</div>
+</body>
+</html>

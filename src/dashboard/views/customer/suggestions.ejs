@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title %> - MPBot</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <%- include('../partials/sidebar', { currentPage: 'suggestions' }) %>
+
+  <% if (query && query.saved) { %>
+    <div class="alert alert-success">Settings saved successfully!</div>
+  <% } %>
+  <% if (query && query.error) { %>
+    <div class="alert alert-error">
+      <%= query.error === 'invalid_action' ? 'Invalid action specified.' : query.error === 'not_found' ? 'Suggestion not found.' : query.error === 'channel_required' ? 'Channel ID is required.' : 'An error occurred.' %>
+    </div>
+  <% } %>
+
+  <div class="page-header">
+    <div style="display:flex;align-items:center;gap:1rem;">
+      <% if (guild.icon) { %><img src="<%= guild.icon %>" style="width:48px;height:48px;border-radius:50%;"><% } %>
+      <div>
+        <h1>Suggestions</h1>
+        <span style="color:#8b949e;font-size:0.9rem;"><%= guild.name %> · <%= suggestions.length %> suggestions</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <h2 class="card-title">Suggestion Channel Configuration</h2>
+    </div>
+    <p>Configure where suggestions are posted and who can manage them.</p>
+    <form method="POST" action="/customer/guild/<%= guild.id %>/suggestions/config">
+      <div class="form-group">
+        <label>Channel ID</label>
+        <input type="text" name="channel_id" value="<%= config.channel_id || '' %>" placeholder="Channel ID" style="width:300px;">
+      </div>
+      <div class="form-group">
+        <label>Staff Role IDs (one per line)</label>
+        <textarea name="staff_roles" rows="4" style="width:100%;background:#0f0f1a;border:1px solid #2a2a4a;border-radius:6px;padding:0.6rem;color:#e0e0e0;font-family:inherit;"><% if (config.staff_roles) { %><%= Array.isArray(config.staff_roles) ? config.staff_roles.join('\n') : config.staff_roles %><% } %></textarea>
+      </div>
+      <button type="submit" class="btn btn-primary">Save Config</button>
+    </form>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <h2 class="card-title">All Suggestions</h2>
+    </div>
+    <% if (suggestions.length > 0) { %>
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>User</th>
+              <th>Content</th>
+              <th>Status</th>
+              <th>Votes</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% suggestions.forEach(s => { %>
+              <tr>
+                <td><%= s.id %></td>
+                <td><%= s.user_name || s.user_id %></td>
+                <td><%= s.content.length > 60 ? s.content.substring(0, 60) + '...' : s.content %></td>
+                <td>
+                  <% if (s.status === 'pending') { %><span class="badge badge-warning">Pending</span><% } %>
+                  <% if (s.status === 'accepted') { %><span class="badge badge-active">Accepted</span><% } %>
+                  <% if (s.status === 'denied') { %><span class="badge badge-danger">Denied</span><% } %>
+                  <% if (s.status === 'implemented') { %><span class="badge badge-active">Implemented</span><% } %>
+                </td>
+                <td>↑ <%= s.upvotes || 0 %> ↓ <%= s.downvotes || 0 %></td>
+                <td>
+                  <% if (s.status === 'pending') { %>
+                    <form method="POST" action="/customer/guild/<%= guild.id %>/suggestions/action/<%= s.id %>?action=accept" style="display:inline;">
+                      <button type="submit" class="btn btn-primary btn-sm">Accept</button>
+                    </form>
+                    <form method="POST" action="/customer/guild/<%= guild.id %>/suggestions/action/<%= s.id %>?action=deny" style="display:inline;">
+                      <button type="submit" class="btn btn-sm" style="background:rgba(255,82,82,0.15);color:#ff8a80;border:1px solid rgba(255,82,82,0.3);">Deny</button>
+                    </form>
+                  <% } %>
+                  <% if (s.status === 'accepted') { %>
+                    <form method="POST" action="/customer/guild/<%= guild.id %>/suggestions/action/<%= s.id %>?action=implement" style="display:inline;">
+                      <button type="submit" class="btn btn-sm" style="background:rgba(0,200,83,0.15);color:#69f0ae;border:1px solid rgba(0,200,83,0.3);">Implement</button>
+                    </form>
+                  <% } %>
+                </td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+    <% } else { %>
+      <p style="color:#8b949e;">No suggestions yet for this server.</p>
+    <% } %>
+  </div>
+  </main>
+</div>
+</body>
+</html>

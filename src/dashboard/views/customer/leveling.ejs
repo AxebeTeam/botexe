@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title %> - MPBot</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<%- include('../partials/sidebar', { currentPage: 'leveling' }) %>
+
+    <div class="main-header">
+      <div>
+        <h1>📈 Leveling</h1>
+        <div class="breadcrumb"><%= guild.name %> / <span>Level Rewards</span></div>
+      </div>
+    </div>
+
+    <% if (query && query.saved) { %>
+      <div class="alert alert-success">✅ Level reward saved!</div>
+    <% } %>
+    <% if (query && query.error) { %>
+      <div class="alert alert-error">❌ Invalid level or role ID.</div>
+    <% } %>
+
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-icon green">📈</div>
+        <div class="stat-body">
+          <div class="stat-value"><%= leveledUsers %></div>
+          <div class="stat-label">Leveled Members</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon purple">🎖️</div>
+        <div class="stat-body">
+          <div class="stat-value"><%= rewards.length %></div>
+          <div class="stat-label">Level Rewards</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">➕ Add Level Reward</div>
+      </div>
+      <p class="card-desc">Automatically assign a role when a member reaches a certain level.</p>
+      <form method="POST" action="/customer/guild/<%= guild.id %>/leveling/reward">
+        <div class="form-row" style="grid-template-columns:1fr 2fr;">
+          <div class="form-group">
+            <label>Level</label>
+            <input type="number" name="level" min="1" placeholder="e.g. 5" required>
+          </div>
+          <div class="form-group">
+            <label>Role ID</label>
+            <input type="text" name="role_id" placeholder="Paste the role ID" required>
+          </div>
+        </div>
+        <button type="submit" class="btn btn-primary">Add Reward</button>
+      </form>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">🎖️ Current Rewards</div>
+        <span style="font-size:.8rem;color:var(--text-muted);"><%= rewards.length %> rewards</span>
+      </div>
+      <% if (rewards.length > 0) { %>
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead>
+              <tr><th>Level</th><th>Role ID</th><th>Actions</th></tr>
+            </thead>
+            <tbody>
+              <% rewards.forEach(r => { %>
+                <tr>
+                  <td><strong>Level <%= r.level %></strong></td>
+                  <td><code><%= r.role_id %></code></td>
+                  <td>
+                    <form method="POST" action="/customer/guild/<%= guild.id %>/leveling/delete/<%= r.id %>" onsubmit="return confirm('Delete this reward?')" style="display:inline;">
+                      <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+                    </form>
+                  </td>
+                </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
+      <% } else { %>
+        <div class="empty-state">
+          <div class="empty-icon">🎖️</div>
+          <h3>No Level Rewards</h3>
+          <p>Add rewards above to automatically give roles when members level up.</p>
+        </div>
+      <% } %>
+    </div>
+
+  </main>
+</div>
+</body>
+</html>

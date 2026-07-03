@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title %> - MPBot</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<%- include('../partials/sidebar', { currentPage: 'shop' }) %>
+
+    <div class="main-header">
+      <div>
+        <h1>🛒 Shop</h1>
+        <div class="breadcrumb"><%= guild.name %> / <span>Economy Shop</span></div>
+      </div>
+    </div>
+
+    <% if (query && query.saved) { %>
+      <div class="alert alert-success">✅ Item saved!</div>
+    <% } %>
+    <% if (query && query.error) { %>
+      <div class="alert alert-error">❌ Invalid item data. Name and price are required.</div>
+    <% } %>
+
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-icon purple">🛒</div>
+        <div class="stat-body">
+          <div class="stat-value"><%= items.length %></div>
+          <div class="stat-label">Shop Items</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">➕ Add Item</div>
+      </div>
+      <p class="card-desc">Create items that members can buy with in-server currency.</p>
+      <form method="POST" action="/customer/guild/<%= guild.id %>/shop/save">
+        <div class="form-row" style="grid-template-columns:1fr 1fr 1fr;">
+          <div class="form-group">
+            <label>Name</label>
+            <input type="text" name="name" placeholder="e.g. VIP Role" required>
+          </div>
+          <div class="form-group">
+            <label>Price</label>
+            <input type="number" name="price" min="1" placeholder="e.g. 500" required>
+          </div>
+          <div class="form-group">
+            <label>Emoji</label>
+            <input type="text" name="emoji" placeholder="e.g. 👑" value="🛒">
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Description</label>
+          <input type="text" name="description" placeholder="What does this item do?">
+        </div>
+        <div class="form-group">
+          <label>Role ID (optional - give this role on purchase)</label>
+          <input type="text" name="role_id" placeholder="Role ID to assign when purchased">
+        </div>
+        <button type="submit" class="btn btn-primary">Add Item</button>
+      </form>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">📦 Shop Items</div>
+        <span style="font-size:.8rem;color:var(--text-muted);"><%= items.length %> items</span>
+      </div>
+      <% if (items.length > 0) { %>
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead>
+              <tr><th>Item</th><th>Price</th><th>Role</th><th>Actions</th></tr>
+            </thead>
+            <tbody>
+              <% items.forEach(item => { %>
+                <tr>
+                  <td><%= item.emoji || '🛒' %> <strong><%= item.name %></strong><br><small style="color:var(--text-muted);"><%= item.description %></small></td>
+                  <td><span class="badge badge-active">💰 <%= item.price %></span></td>
+                  <td><%= item.role_id ? '<code>' + item.role_id.slice(0,10) + '..</code>' : '-' %></td>
+                  <td>
+                    <form method="POST" action="/customer/guild/<%= guild.id %>/shop/delete/<%= item.id %>" onsubmit="return confirm('Delete this item?')" style="display:inline;">
+                      <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+                    </form>
+                  </td>
+                </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
+      <% } else { %>
+        <div class="empty-state">
+          <div class="empty-icon">🛍️</div>
+          <h3>No Shop Items</h3>
+          <p>Add items above that members can buy with their coins.</p>
+        </div>
+      <% } %>
+    </div>
+
+  </main>
+</div>
+</body>
+</html>

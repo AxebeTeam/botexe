@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title %> - MPBot</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <style>
+    .color-preview { width: 100%; height: 40px; border-radius: 8px; margin-top: 0.5rem; border: 1px solid var(--border); }
+    .category-tag { display: inline-flex; align-items: center; gap: 0.3rem; padding: 0.3rem 0.7rem; border-radius: 20px; font-size: 0.8rem; font-weight: 500; margin: 0.2rem; }
+    .category-tag.primary { background: rgba(108,92,231,0.15); color: #a29bfe; border: 1px solid rgba(108,92,231,0.3); }
+    .category-tag.danger { background: rgba(255,82,82,0.15); color: #ff8a80; border: 1px solid rgba(255,82,82,0.3); }
+    .category-tag.success { background: rgba(0,200,83,0.15); color: #69f0ae; border: 1px solid rgba(0,200,83,0.3); }
+    .category-tag.warning { background: rgba(255,193,7,0.15); color: #ffd740; border: 1px solid rgba(255,193,7,0.3); }
+    .panel-preview { background: var(--bg-input); border: 2px dashed var(--border); border-radius: var(--radius); padding: 2rem; text-align: center; margin: 1rem 0; }
+    .panel-preview .preview-title { font-size: 1.3rem; font-weight: 700; margin-bottom: 0.5rem; }
+    .panel-preview .preview-desc { color: var(--text-secondary); margin-bottom: 1.5rem; }
+    .preview-buttons { display: flex; gap: 0.5rem; justify-content: center; flex-wrap: wrap; }
+    .preview-btn { padding: 0.5rem 1.2rem; border-radius: 8px; border: none; font-weight: 600; cursor: default; }
+    .template-select { display: flex; gap: 0.75rem; flex-wrap: wrap; margin-bottom: 1rem; }
+    .template-card { background: var(--bg-input); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 1rem; cursor: pointer; transition: var(--transition); flex: 1; min-width: 140px; text-align: center; }
+    .template-card:hover { border-color: var(--accent); background: rgba(108,92,231,0.05); }
+    .template-card h4 { font-size: 0.9rem; margin-bottom: 0.3rem; }
+    .template-card p { font-size: 0.78rem; color: var(--text-secondary); }
+    .live-preview-box { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.5rem; margin-top: 1rem; }
+    .live-preview-box .embed-mock { background: #2f3136; border-left: 4px solid var(--preview-color, var(--accent)); border-radius: 4px; padding: 1rem; }
+  </style>
+</head>
+<body>
+  <%- include('../partials/sidebar', { currentPage: 'tickets' }) %>
+
+    <% if (query && query.saved) { %>
+      <div class="alert alert-success">Settings saved successfully!</div>
+    <% } %>
+    <% if (query && query.error) { %>
+      <div class="alert alert-error">
+        <%= query.error === 'no_channel' ? 'Please enter a valid Channel ID.' : query.error === 'no_panel' ? 'Panel not found. Create one first.' : query.error === 'bad_channel' ? 'Channel not found. Make sure the ID is correct.' : 'An error occurred.' %>
+      </div>
+    <% } %>
+
+    <div class="page-header">
+      <div style="display:flex;align-items:center;gap:1rem;">
+        <% if (guild.icon) { %><img src="<%= guild.icon %>" style="width:44px;height:44px;border-radius:50%;"><% } %>
+        <div>
+          <h1>Ticket System</h1>
+          <span style="color:var(--text-secondary);font-size:0.9rem;"><%= guild.name %> · <%= ticketCount %> tickets created</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tabs">
+      <span class="tab active" onclick="showTab('panels', this)">Panels</span>
+      <span class="tab" onclick="showTab('templates', this)">Templates</span>
+      <span class="tab" onclick="showTab('settings', this)">Settings</span>
+    </div>
+
+    <!-- Tab: Panels -->
+    <div id="tab-panels" class="tab-content">
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">Your Ticket Panels</h2>
+        </div>
+        <div class="card-body">
+          <p>Panels are fancy embed messages with buttons that let users create tickets. Each button represents a category (Support, Report, Apply, etc.).</p>
+
+          <% if (panels.length > 0) { %>
+            <div class="table-container" style="margin-bottom:1.5rem;">
+              <table class="data-table">
+                <thead>
+                  <tr><th>Panel Name</th><th>Title</th><th>Categories</th><th>Color</th><th>Status</th></tr>
+                </thead>
+                <tbody>
+                  <% panels.forEach(p => { %>
+                    <tr>
+                      <td><strong><%= p.panel_name %></strong></td>
+                      <td><%= p.embed_title %></td>
+                      <td>
+                        <% try { JSON.parse(p.categories || '[]').forEach(c => { %>
+                          <span class="category-tag <%= (c.color||'primary').toLowerCase() %>"><%= c.emoji||'' %> <%= c.label %></span>
+                        <% }); } catch(e) {} %>
+                      </td>
+                      <td><span style="display:inline-block;width:20px;height:20px;border-radius:4px;background:<%= p.embed_color||'#0099ff' %>;vertical-align:middle;"></span> <%= p.embed_color %></td>
+                      <td>
+                        <% if (p.channel_id) { %>
+                          <span class="badge badge-active">Sent</span>
+                        <% } else { %>
+                          <span class="badge badge-inactive">Not sent</span>
+                        <% } %>
+                      </td>
+                    </tr>
+                  <% }) %>
+                </tbody>
+              </table>
+            </div>
+          <% } else { %>
+            <div class="panel-preview">
+              <div style="font-size:3rem;margin-bottom:1rem;">🎫</div>
+              <p style="color:var(--text-secondary);">No panels yet. Create one below.</p>
+            </div>
+          <% } %>
+
+          <details>
+            <summary><% if (panels.length > 0) { %>Edit Panel<% } else { %>+ Create New Panel<% } %></summary>
+            <form method="POST" action="/customer/guild/<%= guild.id %>/tickets/save-panel" style="margin-top:1rem;">
+              <div class="form-row">
+                <div class="form-group">
+                  <label>Panel Name</label>
+                  <input type="text" name="panel_name" value="default" placeholder="e.g. support, main">
+                </div>
+                <div class="form-group">
+                  <label>Embed Color (hex)</label>
+                  <input type="text" name="embed_color" id="embedColor" value="#0099ff" placeholder="#0099ff">
+                  <div class="color-preview" id="colorPreview" style="background:#0099ff;"></div>
+                </div>
+              </div>
+              <div class="form-group">
+                <label>Embed Title</label>
+                <input type="text" name="embed_title" id="embedTitle" value="Create a Ticket" placeholder="Create a Ticket">
+              </div>
+              <div class="form-group">
+                <label>Embed Description</label>
+                <textarea name="embed_description" id="embedDesc" rows="2" placeholder="Click a button below to open a ticket.">Click a button below to open a ticket.</textarea>
+              </div>
+              <div class="form-group">
+                <label>Categories <span style="color:var(--text-muted);font-weight:400;">(Add buttons for each ticket type)</span></label>
+                <div id="categoryEditor">
+                  <div class="category-row" style="display:flex;gap:0.5rem;align-items:center;margin-bottom:0.5rem;flex-wrap:wrap;" data-index="0">
+                    <input type="text" name="emoji" value="🎫" placeholder="Emoji" style="width:60px;text-align:center;">
+                    <input type="text" name="label" value="Support" placeholder="Label" style="flex:1;min-width:100px;">
+                    <select name="color" style="width:110px;">
+                      <option value="Primary">Primary</option>
+                      <option value="Success">Success</option>
+                      <option value="Danger">Danger</option>
+                      <option value="Warning">Warning</option>
+                      <option value="Secondary">Secondary</option>
+                    </select>
+                    <input type="text" name="welcome" value="We will be with you shortly." placeholder="Welcome message" style="flex:2;min-width:150px;">
+                    <button type="button" class="btn btn-sm btn-danger" onclick="this.parentElement.remove();updatePreviewFromForm();" style="flex-shrink:0;">✕</button>
+                  </div>
+                </div>
+                <button type="button" class="btn btn-sm btn-ghost" onclick="addCategoryRow()">+ Add Category</button>
+                <input type="hidden" name="panel_name" value="default">
+              </div>
+              <button type="submit" class="btn btn-primary">Save Panel</button>
+            </form>
+          </details>
+        </div>
+      </div>
+
+      <!-- Live Preview -->
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">Live Preview</h2>
+        </div>
+        <div class="card-body">
+          <p>This is how your panel will look in Discord. Update the fields above and see changes instantly.</p>
+          <div class="live-preview-box" id="livePreview">
+            <div class="embed-mock" id="embedMock">
+              <div style="color:#fff;font-size:1.1rem;font-weight:700;" id="previewTitle">Create a Ticket</div>
+              <div style="color:#b9bbbe;margin-top:0.3rem;font-size:0.9rem;" id="previewDesc">Click a button below to open a ticket.</div>
+            </div>
+            <div style="display:flex;gap:0.4rem;margin-top:0.8rem;flex-wrap:wrap;" id="previewButtons"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Send Panel -->
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">Send Panel to Channel</h2>
+        </div>
+        <div class="card-body">
+          <p>Send the configured panel to any text channel in your server. Enter the Channel ID below.</p>
+          <form method="POST" action="/customer/guild/<%= guild.id %>/tickets/send-panel">
+            <div style="display:flex;gap:1rem;align-items:end;flex-wrap:wrap;">
+              <div class="form-group" style="margin-bottom:0;">
+                <label>Panel Name</label>
+                <input type="text" name="panel_name" value="default" style="width:150px;">
+              </div>
+              <div class="form-group" style="margin-bottom:0;">
+                <label>Channel ID</label>
+                <input type="text" name="channel_id" placeholder="Paste channel ID here" required style="width:280px;">
+              </div>
+              <button type="submit" class="btn btn-success">Send Panel</button>
+            </div>
+            <p style="color:var(--text-muted);font-size:0.8rem;margin-top:0.5rem;">
+              Tip: Enable Developer Mode in Discord → Right-click channel → Copy ID
+            </p>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tab: Templates -->
+    <div id="tab-templates" class="tab-content" style="display:none;">
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">Panel Templates</h2>
+        </div>
+        <div class="card-body">
+          <p>Choose a pre-made template to quickly set up your ticket system. Click a template to load it into the editor.</p>
+          <div class="template-select">
+            <div class="template-card" onclick="loadTemplate('support')">
+              <div style="font-size:2rem;">🎫</div>
+              <h4>Support Only</h4>
+              <p>Single support button</p>
+            </div>
+            <div class="template-card" onclick="loadTemplate('standard')">
+              <div style="font-size:2rem;">📋</div>
+              <h4>Standard</h4>
+              <p>Support + Report + Apply</p>
+            </div>
+            <div class="template-card" onclick="loadTemplate('full')">
+              <div style="font-size:2rem;">🚀</div>
+              <h4>Full Suite</h4>
+              <p>5 categories</p>
+            </div>
+            <div class="template-card" onclick="loadTemplate('gaming')">
+              <div style="font-size:2rem;">🎮</div>
+              <h4>Gaming</h4>
+              <p>Report + Cheater + Apply</p>
+            </div>
+          </div>
+
+          <div style="margin-top:1rem;background:var(--bg-input);border-radius:var(--radius-sm);padding:1rem;">
+            <p style="color:var(--text-secondary);font-size:0.9rem;">
+              After loading a template, go back to the <a href="#" onclick="showTab('panels', document.querySelector('.tab'));return false;">Panels tab</a> to customize and save.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tab: Settings -->
+    <div id="tab-settings" class="tab-content" style="display:none;">
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">Ticket Category</h2>
+        </div>
+        <div class="card-body">
+          <p>Set the Discord category where ticket channels will be created. Enter the Category ID or leave empty to auto-create.</p>
+          <div class="form-group" style="margin-bottom:0;">
+            <input type="text" placeholder="Category ID (optional)" style="width:300px;">
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">Support Roles</h2>
+        </div>
+        <div class="card-body">
+          <p>Members with these roles will automatically get access to all tickets. Enter Role IDs separated by commas.</p>
+          <div class="form-group" style="margin-bottom:0;">
+            <input type="text" placeholder="Role IDs: 123456789, 987654321" style="width:100%;">
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">Stats</h2>
+        </div>
+        <div class="card-body">
+          <div class="stats-grid" style="margin-bottom:0;">
+            <div class="stat-card stat-info" style="padding:1rem;">
+              <div class="stat-icon" style="width:40px;height:40px;font-size:1.2rem;">🎫</div>
+              <div class="stat-info"><h3 style="font-size:1.3rem;"><%= ticketCount %></h3><p>Total Tickets</p></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script>
+  const TEMPLATES = {
+    support: [['🎫','Support','Primary','We will be with you shortly.']],
+    standard: [['🎫','Support','Primary','We will be with you shortly.'],['🚨','Report','Danger','A staff member will review your report.'],['📝','Apply','Success','Tell us why you want to apply!']],
+    full: [['🎫','Support','Primary','We will be with you shortly.'],['🚨','Report','Danger','A staff member will review your report.'],['📝','Apply','Success','Tell us why you want to apply!'],['💳','Billing','Warning','Our billing team will help you.'],['❓','Other','Secondary','How can we help you?']],
+    gaming: [['🚨','Report Player','Danger','A moderator will review your report.'],['⚖️','Appeal Ban','Warning','Tell us why you should be unbanned.'],['📝','Apply Staff','Success','Why do you want to be staff?']]
+  };
+
+  let categoryIndex = 1;
+
+  function addCategoryRow(data) {
+    const editor = document.getElementById('categoryEditor');
+    const row = document.createElement('div');
+    row.className = 'category-row';
+    row.style.cssText = 'display:flex;gap:0.5rem;align-items:center;margin-bottom:0.5rem;flex-wrap:wrap;';
+    row.innerHTML = `
+      <input type="text" name="emoji" value="${data?.[0]||'🎫'}" placeholder="Emoji" style="width:60px;text-align:center;">
+      <input type="text" name="label" value="${data?.[1]||''}" placeholder="Label" style="flex:1;min-width:100px;">
+      <select name="color" style="width:110px;">
+        ${['Primary','Success','Danger','Warning','Secondary'].map(c =>
+          `<option value="${c}" ${data?.[2]===c?'selected':''}>${c}</option>`
+        ).join('')}
+      </select>
+      <input type="text" name="welcome" value="${data?.[3]||'Support will be with you shortly.'}" placeholder="Welcome message" style="flex:2;min-width:150px;">
+      <button type="button" class="btn btn-sm btn-danger" onclick="this.parentElement.remove();updatePreviewFromForm();" style="flex-shrink:0;">✕</button>
+    `;
+    editor.appendChild(row);
+    updatePreviewFromForm();
+  }
+
+  function loadTemplate(name) {
+    document.getElementById('categoryEditor').innerHTML = '';
+    (TEMPLATES[name] || TEMPLATES.standard).forEach(t => addCategoryRow(t));
+    updatePreviewFromForm();
+    showTab('panels', document.querySelector('.tab'));
+  }
+
+  function showTab(tabId, el) {
+    document.querySelectorAll('.tab-content').forEach(t => t.style.display = 'none');
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.getElementById('tab-' + tabId).style.display = 'block';
+    el.classList.add('active');
+  }
+
+  function updatePreviewFromForm() {
+    const color = document.getElementById('embedColor').value || '#0099ff';
+    const title = document.getElementById('embedTitle').value || 'Create a Ticket';
+    const desc = document.getElementById('embedDesc').value || 'Click a button below to open a ticket.';
+
+    document.getElementById('colorPreview').style.background = color;
+    document.getElementById('embedMock').style.borderLeftColor = color;
+    document.getElementById('previewTitle').textContent = title;
+    document.getElementById('previewDesc').textContent = desc;
+
+    const container = document.getElementById('previewButtons');
+    container.innerHTML = '';
+
+    document.querySelectorAll('#categoryEditor .category-row').forEach(row => {
+      const inputs = row.querySelectorAll('input, select');
+      const emoji = inputs[0]?.value || '🎫';
+      const label = inputs[1]?.value || 'Button';
+      const colorName = inputs[2]?.value || 'Primary';
+
+      const btn = document.createElement('span');
+      btn.className = 'preview-btn';
+      const colors = { Primary: '#6c5ce7', Danger: '#ff5252', Success: '#00c853', Warning: '#ffc107', Secondary: '#9090b0' };
+      btn.style.background = colors[colorName] || '#6c5ce7';
+      btn.style.color = colorName === 'Warning' ? '#000' : '#fff';
+      btn.textContent = emoji + ' ' + label;
+      container.appendChild(btn);
+    });
+  }
+
+  document.addEventListener('input', function(e) {
+    if (e.target.closest('#categoryEditor') || e.target.id === 'embedColor' || e.target.id === 'embedTitle' || e.target.id === 'embedDesc') {
+      updatePreviewFromForm();
+    }
+  });
+
+  updatePreviewFromForm();
+</script>
+</body>
+</html>
