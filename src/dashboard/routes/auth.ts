@@ -9,7 +9,7 @@ const DASHBOARD_PASSWORD = process.env.DASHBOARD_PASSWORD || 'changeme123';
 
 authRouter.get('/login', (req: Request, res: Response) => {
   if ((req.session as any).user) {
-    return res.redirect('/');
+    return res.redirect('/keys');
   }
   res.render('login', { title: 'Login', error: null });
 });
@@ -20,7 +20,7 @@ authRouter.post('/login', async (req: Request, res: Response) => {
   if (username === DASHBOARD_USERNAME && password === DASHBOARD_PASSWORD) {
     (req.session as any).user = { username, role: 'admin' };
     logger.info(`Dashboard login: ${username}`);
-    return res.redirect('/');
+    return res.redirect('/keys');
   }
 
   res.render('login', { title: 'Login', error: 'Invalid credentials' });
