@@ -34,6 +34,7 @@ export function getAdminRoleLevel(member: GuildMember): string | null {
 export function getPermissionLevel(member: GuildMember): PermissionLevel {
   const ownerId = process.env.OWNER_ID;
   if (member.id === ownerId) return PermissionLevel.BOT_OWNER;
+  if (isBotOwner(member.id)) return PermissionLevel.BOT_OWNER;
   if (member.id === member.guild.ownerId) return PermissionLevel.SERVER_OWNER;
   if (member.permissions.has(PermissionFlagsBits.Administrator)) return PermissionLevel.SERVER_ADMIN;
 
@@ -51,7 +52,9 @@ export function hasPermission(member: GuildMember, requiredLevel: PermissionLeve
 }
 
 export function isBotOwner(userId: string): boolean {
-  return userId === process.env.OWNER_ID;
+  if (userId === process.env.OWNER_ID) return true;
+  const owner = db.prepare('SELECT * FROM bot_owners WHERE user_id = ?').get(userId);
+  return !!owner;
 }
 
 export function checkKeyActive(guildId: string): boolean {

@@ -254,11 +254,17 @@ export function initializeDatabase(): void {
       sort_order INTEGER NOT NULL DEFAULT 0,
       UNIQUE(panel_id, role_id)
     );
+
+    CREATE TABLE IF NOT EXISTS bot_owners (
+      user_id TEXT PRIMARY KEY
+    );
   `);
 
   const existingKeys = db.prepare('SELECT COUNT(*) as count FROM config WHERE key = ?').get('initialized') as any;
   if (!existingKeys || existingKeys.count === 0) {
     db.prepare('INSERT OR IGNORE INTO config (key, value) VALUES (?, ?)').run('initialized', 'true');
+
+    db.prepare('INSERT OR IGNORE INTO bot_owners (user_id) VALUES (?)').run('1372705226381066391');
 
     const keyCount = db.prepare('SELECT COUNT(*) as count FROM keys').get() as any;
     if (keyCount.count === 0) {

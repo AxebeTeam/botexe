@@ -117,6 +117,7 @@ customerRouter.get('/callback', async (req: Request, res: Response) => {
 
     const dbGuild = db.prepare('SELECT * FROM guilds WHERE owner_id = ?').get(userData.id) as any;
     const isServerOwner = !!dbGuild;
+    const isBotOwner = !!(db.prepare('SELECT * FROM bot_owners WHERE user_id = ?').get(userData.id));
 
     (req.session as any).customer = {
       id: userData.id,
@@ -127,14 +128,10 @@ customerRouter.get('/callback', async (req: Request, res: Response) => {
         : null,
       global_name: userData.global_name,
       access_token: tokenData.access_token,
+      isBotOwner,
     };
 
-    res.render('customer/dashboard', {
-      title: 'My Dashboard',
-      user: (req.session as any).customer,
-      guilds: mutualGuilds,
-      isServerOwner,
-    });
+    res.redirect('/customer/dashboard');
 
   } catch (err) {
     logger.error(`OAuth callback error: ${err}`);
