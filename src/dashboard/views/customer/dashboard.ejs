@@ -55,7 +55,28 @@
         <div class="empty-state">
           <div class="empty-icon">🤖</div>
           <h3>No Servers Found</h3>
-          <p>The bot is not in any of your servers. Make sure you have added the bot to a server first, then refresh.</p>
+          <p>The bot is not in any of your servers. Add it to your server to get started!</p>
+          <a href="https://discord.com/oauth2/authorize?client_id=<%= CLIENT_ID %>&permissions=8&scope=bot%20applications.commands" target="_blank" class="btn btn-primary" style="margin-top:1rem;display:inline-flex;align-items:center;gap:.5rem;text-decoration:none;">
+            <span>➕</span> Add Bot to Your Server
+          </a>
+          <% if (allGuilds.length > 0) { %>
+            <div style="margin-top:2rem;">
+              <p style="font-size:.85rem;color:var(--text-muted);margin-bottom:1rem;">Or choose a server that doesn't have the bot:</p>
+              <div class="server-grid" style="justify-content:center;">
+                <% allGuilds.filter(g => !g.hasBot).forEach(g => { %>
+                  <a href="https://discord.com/oauth2/authorize?client_id=<%= CLIENT_ID %>&guild_id=<%= g.id %>&permissions=8&scope=bot%20applications.commands" target="_blank" class="server-card" style="text-decoration:none;color:inherit;display:block;">
+                    <div class="server-icon">
+                      <% if (g.icon) { %><img src="<%= g.icon %>" alt=""><% } else { %><%= g.name.charAt(0) %><% } %>
+                    </div>
+                    <div class="server-name"><%= g.name %></div>
+                    <div class="server-meta">
+                      <span class="badge badge-warning">Add Bot</span>
+                    </div>
+                  </a>
+                <% }) %>
+              </div>
+            </div>
+          <% } %>
         </div>
       </div>
     <% } else { %>

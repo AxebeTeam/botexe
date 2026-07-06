@@ -37,7 +37,13 @@ async function populateSidebarData(req: Request, res: Response, next: Function) 
         memberCount: client?.guilds.cache.get(g.id)?.memberCount || 0,
         owner: g.owner,
       }));
-    } catch { res.locals.sidebarGuilds = []; }
+      res.locals.allUserGuilds = userGuilds.map(g => ({
+        id: g.id, name: g.name,
+        icon: g.icon ? `https://cdn.discordapp.com/icons/${g.id}/${g.icon}.${g.icon.startsWith('a_') ? 'gif' : 'png'}` : null,
+        owner: g.owner,
+        hasBot: botGuildIds.includes(g.id),
+      }));
+    } catch { res.locals.sidebarGuilds = []; res.locals.allUserGuilds = []; }
   }
   next();
 }
@@ -141,6 +147,8 @@ customerRouter.get('/dashboard', async (req: Request, res: Response) => {
     title: 'My Dashboard',
     user: customer,
     guilds,
+    allGuilds: res.locals.allUserGuilds || [],
+    CLIENT_ID,
     query: req.query,
   });
 });
