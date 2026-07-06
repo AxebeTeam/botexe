@@ -5,8 +5,54 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title><%= title %> - MPBot</title>
   <link rel="stylesheet" href="/css/style.css">
+  <style>
+    .add-bot-fixed {
+      position: fixed;
+      top: 1rem;
+      right: 1rem;
+      z-index: 9999;
+      background: linear-gradient(135deg, #ff6b00, #ff8c00);
+      color: #fff;
+      padding: .7rem 1.4rem;
+      border-radius: 50px;
+      font-weight: 700;
+      font-size: .9rem;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: .5rem;
+      box-shadow: 0 4px 20px rgba(255,107,0,.4);
+      transition: all .3s ease;
+      animation: pulse 2s infinite;
+    }
+    .add-bot-fixed:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 25px rgba(255,107,0,.6);
+    }
+    .server-card-no-bot {
+      opacity: .7;
+      border: 2px dashed var(--border);
+      position: relative;
+    }
+    .server-card-no-bot:hover { opacity: 1; border-color: #ff6b00; }
+    .server-card-no-bot .add-overlay {
+      position: absolute;
+      top: .5rem;
+      right: .5rem;
+      background: #ff6b00;
+      color: #fff;
+      font-size: .65rem;
+      padding: .2rem .5rem;
+      border-radius: 20px;
+      font-weight: 600;
+    }
+  </style>
 </head>
 <body>
+<a href="https://discord.com/oauth2/authorize?client_id=<%= CLIENT_ID %>&permissions=8&scope=bot%20applications.commands" target="_blank" class="add-bot-fixed">
+  <span>➕</span> Add Bot to Your Server
+</a>
+
 <%- include('../partials/sidebar', { currentPage: 'dashboard' }) %>
 
     <div class="main-header">
@@ -17,69 +63,67 @@
       <div class="header-actions">
         <span style="font-size:.85rem;color:var(--text-secondary);display:flex;align-items:center;gap:.5rem;">
           <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--green);"></span>
-          <%= guilds.length %> servers
+          <%= guilds.length %> servers with bot
         </span>
       </div>
     </div>
 
-    <!-- Stats -->
     <div class="stats-row">
       <div class="stat-card">
         <div class="stat-icon purple">📊</div>
         <div class="stat-body">
+          <div class="stat-value"><%= allGuilds.length %></div>
+          <div class="stat-label">Total Servers</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon blue">🤖</div>
+        <div class="stat-body">
           <div class="stat-value"><%= guilds.length %></div>
-          <div class="stat-label">My Servers</div>
+          <div class="stat-label">Bot Added</div>
         </div>
-        <span class="stat-trend up">+<%= guilds.length %></span>
       </div>
       <div class="stat-card">
-        <div class="stat-icon blue">👥</div>
+        <div class="stat-icon green">👑</div>
         <div class="stat-body">
-          <div class="stat-value"><%= guilds.reduce((a,g) => a + (g.memberCount||0), 0) %></div>
-          <div class="stat-label">Total Members</div>
+          <div class="stat-value"><%= allGuilds.filter(g => g.hasAdmin).length %></div>
+          <div class="stat-label">Admin Servers</div>
         </div>
-        <span class="stat-trend up">Active</span>
       </div>
       <div class="stat-card">
-        <div class="stat-icon green">✅</div>
+        <div class="stat-icon red">⚠️</div>
         <div class="stat-body">
-          <div class="stat-value"><%= guilds.filter(g => g.owner).length %></div>
-          <div class="stat-label">Owned Servers</div>
+          <div class="stat-value"><%= allGuilds.filter(g => g.hasAdmin && !g.hasBot).length %></div>
+          <div class="stat-label">Need Bot</div>
         </div>
-        <span class="stat-trend up">Owner</span>
       </div>
     </div>
 
-    <% if (guilds.length === 0) { %>
-      <div class="card" style="padding:3rem;text-align:center;">
-        <div class="empty-state">
-          <div class="empty-icon">🤖</div>
-          <h3>No Servers Found</h3>
-          <p>The bot is not in any of your servers. Add it to your server to get started!</p>
-          <a href="https://discord.com/oauth2/authorize?client_id=<%= CLIENT_ID %>&permissions=8&scope=bot%20applications.commands" target="_blank" class="btn btn-primary" style="margin-top:1rem;display:inline-flex;align-items:center;gap:.5rem;text-decoration:none;">
-            <span>➕</span> Add Bot to Your Server
-          </a>
-          <% if (allGuilds.length > 0) { %>
-            <div style="margin-top:2rem;">
-              <p style="font-size:.85rem;color:var(--text-muted);margin-bottom:1rem;">Or choose a server that doesn't have the bot:</p>
-              <div class="server-grid" style="justify-content:center;">
-                <% allGuilds.filter(g => !g.hasBot).forEach(g => { %>
-                  <a href="https://discord.com/oauth2/authorize?client_id=<%= CLIENT_ID %>&guild_id=<%= g.id %>&permissions=8&scope=bot%20applications.commands" target="_blank" class="server-card" style="text-decoration:none;color:inherit;display:block;">
-                    <div class="server-icon">
-                      <% if (g.icon) { %><img src="<%= g.icon %>" alt=""><% } else { %><%= g.name.charAt(0) %><% } %>
-                    </div>
-                    <div class="server-name"><%= g.name %></div>
-                    <div class="server-meta">
-                      <span class="badge badge-warning">Add Bot</span>
-                    </div>
-                  </a>
-                <% }) %>
+    <% if (allGuilds.filter(g => g.hasAdmin && !g.hasBot).length > 0) { %>
+      <div class="card" style="border-left:3px solid #ff6b00;">
+        <div class="card-header">
+          <div class="card-title" style="color:#ff6b00;">➕ Add Bot to Your Servers</div>
+          <span style="font-size:.8rem;color:var(--text-muted);"><%= allGuilds.filter(g => g.hasAdmin && !g.hasBot).length %> servers</span>
+        </div>
+        <p class="card-desc">These are servers where you have admin permissions but the bot hasn't been added yet.</p>
+        <div class="server-grid">
+          <% allGuilds.filter(g => g.hasAdmin && !g.hasBot).forEach(g => { %>
+            <a href="https://discord.com/oauth2/authorize?client_id=<%= CLIENT_ID %>&guild_id=<%= g.id %>&permissions=8&scope=bot%20applications.commands" target="_blank" class="server-card server-card-no-bot" style="text-decoration:none;color:inherit;display:block;">
+              <div class="add-overlay">Add Bot</div>
+              <div class="server-icon">
+                <% if (g.icon) { %><img src="<%= g.icon %>" alt=""><% } else { %><%= g.name.charAt(0) %><% } %>
               </div>
-            </div>
-          <% } %>
+              <div class="server-name"><%= g.name %></div>
+              <div class="server-meta">
+                <% if (g.owner) { %><span class="badge badge-active">Owner</span><% } else { %><span class="badge badge-warning">Admin</span><% } %>
+              </div>
+            </a>
+          <% }) %>
         </div>
       </div>
-    <% } else { %>
+    <% } %>
+
+    <% if (guilds.length > 0) { %>
       <div class="card">
         <div class="card-header">
           <div class="card-title">📋 My Servers</div>

@@ -37,12 +37,18 @@ async function populateSidebarData(req: Request, res: Response, next: Function) 
         memberCount: client?.guilds.cache.get(g.id)?.memberCount || 0,
         owner: g.owner,
       }));
-      res.locals.allUserGuilds = userGuilds.map(g => ({
-        id: g.id, name: g.name,
-        icon: g.icon ? `https://cdn.discordapp.com/icons/${g.id}/${g.icon}.${g.icon.startsWith('a_') ? 'gif' : 'png'}` : null,
-        owner: g.owner,
-        hasBot: botGuildIds.includes(g.id),
-      }));
+      res.locals.allUserGuilds = userGuilds.map(g => {
+        const perms = BigInt(g.permissions || '0');
+        const hasAdmin = g.owner || (perms & 0x20n) === 0x20n || (perms & 0x8n) === 0x8n;
+        return {
+          id: g.id, name: g.name,
+          icon: g.icon ? `https://cdn.discordapp.com/icons/${g.id}/${g.icon}.${g.icon.startsWith('a_') ? 'gif' : 'png'}` : null,
+          owner: g.owner,
+          hasBot: botGuildIds.includes(g.id),
+          hasAdmin,
+          memberCount: client?.guilds.cache.get(g.id)?.memberCount || 0,
+        };
+      });
     } catch { res.locals.sidebarGuilds = []; res.locals.allUserGuilds = []; }
   }
   next();
