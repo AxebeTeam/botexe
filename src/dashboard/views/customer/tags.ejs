@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title %> - MPBot</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<%- include('../partials/sidebar', { currentPage: 'tags' }) %>
+
+    <div class="main-header">
+      <div>
+        <h1>🏷️ Tags</h1>
+        <div class="breadcrumb"><%= guild.name %> / <span>Tags</span></div>
+      </div>
+    </div>
+
+    <% if (query && query.saved) { %>
+      <div class="alert alert-success">✅ Tag deleted!</div>
+    <% } %>
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">🏷️ All Tags</div>
+        <span style="font-size:.8rem;color:var(--text-muted);"><%= tags.length %> tags</span>
+      </div>
+      <p class="card-desc">Manage text tags for your server. Tags are created using <code>/tag create</code> in Discord.</p>
+
+      <% if (tags.length === 0) { %>
+        <div class="empty-state">
+          <div class="empty-icon">🏷️</div>
+          <h3>No Tags Created</h3>
+          <p>Use <code>/tag create</code> in Discord to create tags.</p>
+        </div>
+      <% } else { %>
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead>
+              <tr><th>Name</th><th>Content</th><th>Uses</th><th>Actions</th></tr>
+            </thead>
+            <tbody>
+              <% tags.forEach(function(t) { %>
+                <tr>
+                  <td><code><%= t.name %></code></td>
+                  <td><%= t.content.substring(0, 50) %><%= t.content.length > 50 ? '...' : '' %></td>
+                  <td><%= t.uses %></td>
+                  <td>
+                    <form method="POST" action="/customer/guild/<%= guild.id %>/tags/delete" style="display:inline" onsubmit="return confirm('Delete this tag?')">
+                      <input type="hidden" name="tag_id" value="<%= t.id %>">
+                      <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+                    </form>
+                  </td>
+                </tr>
+              <% }); %>
+            </tbody>
+          </table>
+        </div>
+      <% } %>
+    </div>
+
+  </main>
+</div>
+</body>
+</html>

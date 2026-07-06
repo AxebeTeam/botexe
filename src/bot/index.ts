@@ -11,6 +11,12 @@ import { handleAutoModMessage } from './events/autoModMessage';
 import { handleReactionRoles } from './events/reactionRoleHandler';
 import { handleTicketButtons } from './events/ticketButtonHandler';
 import { handleSuggestionVotes } from './events/suggestionVoteHandler';
+import { handleMessageLogs } from './events/messageLogs';
+import { handleMemberLogs } from './events/memberLogs';
+import { handleStarboard } from './events/starboard';
+import { handleAutoRole } from './events/autoRole';
+import { handleBirthdayNotifier } from './events/birthdayNotifier';
+import { handleReminders } from './events/reminderHandler';
 import { logger } from '../utils/logger';
 
 let client: Client;
@@ -41,6 +47,12 @@ export function createBotClient(): Client {
   handleReactionRoles(client);
   handleTicketButtons(client);
   handleSuggestionVotes(client);
+  handleMessageLogs(client);
+  handleMemberLogs(client);
+  handleStarboard(client);
+  handleAutoRole(client);
+  handleBirthdayNotifier(client);
+  handleReminders(client);
 
   return client;
 }

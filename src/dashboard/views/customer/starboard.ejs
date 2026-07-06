@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title %> - MPBot</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<%- include('../partials/sidebar', { currentPage: 'starboard' }) %>
+
+    <div class="main-header">
+      <div>
+        <h1>⭐ Starboard</h1>
+        <div class="breadcrumb"><%= guild.name %> / <span>Starboard</span></div>
+      </div>
+    </div>
+
+    <% if (query && query.saved) { %>
+      <div class="alert alert-success">✅ Starboard settings saved!</div>
+    <% } %>
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">⭐ Starboard Settings</div>
+      </div>
+      <p class="card-desc">Configure the starboard channel and threshold for starring messages.</p>
+
+      <form method="POST" action="/customer/guild/<%= guild.id %>/starboard">
+        <div class="form-group">
+          <label>Starboard Channel ID</label>
+          <input type="text" name="channel_id" class="form-input" value="<%= config.channel_id || '' %>" placeholder="Channel ID">
+        </div>
+
+        <div class="form-group">
+          <label>Star Threshold (min stars to post)</label>
+          <input type="number" name="threshold" class="form-input" value="<%= config.threshold || 3 %>" min="1" max="50">
+        </div>
+
+        <div class="form-group">
+          <label>Star Emoji</label>
+          <input type="text" name="emoji" class="form-input" value="<%= config.emoji || '⭐' %>" placeholder="⭐">
+        </div>
+
+        <button type="submit" class="btn btn-primary">Save Settings</button>
+      </form>
+    </div>
+
+  </main>
+</div>
+</body>
+</html>

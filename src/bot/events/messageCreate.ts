@@ -10,6 +10,26 @@ export function handleMessageCreate(client: Client): void {
 
     const userId = message.author.id;
     const guildId = message.guildId;
+
+    // Remove AFK when user sends a message
+    const afkUser = db.prepare('SELECT * FROM afk_users WHERE guild_id = ? AND user_id = ?').get(guildId, userId) as any;
+    if (afkUser) {
+      db.prepare('DELETE FROM afk_users WHERE guild_id = ? AND user_id = ?').run(guildId, userId);
+      try {
+        await message.reply({ content: '✅ Welcome back! I removed your AFK status.', allowedMentions: { repliedUser: false } });
+      } catch {}
+    }
+
+    // Check if mentioned users are AFK
+    for (const [_, member] of message.mentions.members || []) {
+      const mentionedAfk = db.prepare('SELECT * FROM afk_users WHERE guild_id = ? AND user_id = ?').get(guildId, member.id) as any;
+      if (mentionedAfk) {
+        try {
+          await message.reply({ content: `💤 **${member.user.tag}** is AFK: ${mentionedAfk.reason} (since <t:${Math.floor(new Date(mentionedAfk.afk_since).getTime() / 1000)}:R>)`, allowedMentions: { repliedUser: false } });
+        } catch {}
+      }
+    }
+
     const now = Date.now();
 
     const lastMessage = cooldowns.get(userId);

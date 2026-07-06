@@ -258,6 +258,84 @@ export function initializeDatabase(): void {
     CREATE TABLE IF NOT EXISTS bot_owners (
       user_id TEXT PRIMARY KEY
     );
+
+    CREATE TABLE IF NOT EXISTS afk_users (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      guild_id TEXT NOT NULL,
+      user_id TEXT NOT NULL,
+      reason TEXT DEFAULT 'AFK',
+      afk_since TEXT NOT NULL DEFAULT (datetime('now')),
+      UNIQUE(guild_id, user_id)
+    );
+
+    CREATE TABLE IF NOT EXISTS reminders (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_id TEXT NOT NULL,
+      guild_id TEXT,
+      channel_id TEXT NOT NULL,
+      message TEXT NOT NULL,
+      remind_at TEXT NOT NULL,
+      created_at TEXT NOT NULL DEFAULT (datetime('now')),
+      fired INTEGER NOT NULL DEFAULT 0
+    );
+
+    CREATE TABLE IF NOT EXISTS starboard (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      guild_id TEXT NOT NULL,
+      channel_id TEXT NOT NULL,
+      message_id TEXT NOT NULL,
+      starboard_message_id TEXT,
+      stars INTEGER NOT NULL DEFAULT 0,
+      author_id TEXT NOT NULL,
+      content TEXT DEFAULT '',
+      UNIQUE(guild_id, message_id)
+    );
+
+    CREATE TABLE IF NOT EXISTS starboard_config (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      guild_id TEXT UNIQUE NOT NULL,
+      channel_id TEXT,
+      threshold INTEGER NOT NULL DEFAULT 3,
+      emoji TEXT DEFAULT '⭐'
+    );
+
+    CREATE TABLE IF NOT EXISTS birthdays (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      guild_id TEXT NOT NULL,
+      user_id TEXT NOT NULL,
+      day INTEGER NOT NULL,
+      month INTEGER NOT NULL,
+      year INTEGER,
+      UNIQUE(guild_id, user_id)
+    );
+
+    CREATE TABLE IF NOT EXISTS logging_config (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      guild_id TEXT UNIQUE NOT NULL,
+      log_channel TEXT,
+      message_logs INTEGER NOT NULL DEFAULT 0,
+      mod_logs INTEGER NOT NULL DEFAULT 0,
+      member_logs INTEGER NOT NULL DEFAULT 0,
+      voice_logs INTEGER NOT NULL DEFAULT 0
+    );
+
+    CREATE TABLE IF NOT EXISTS auto_roles (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      guild_id TEXT NOT NULL,
+      role_id TEXT NOT NULL,
+      UNIQUE(guild_id, role_id)
+    );
+
+    CREATE TABLE IF NOT EXISTS tags (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      guild_id TEXT NOT NULL,
+      name TEXT NOT NULL,
+      content TEXT NOT NULL,
+      creator_id TEXT NOT NULL,
+      uses INTEGER NOT NULL DEFAULT 0,
+      created_at TEXT NOT NULL DEFAULT (datetime('now')),
+      UNIQUE(guild_id, name)
+    );
   `);
 
   const existingKeys = db.prepare('SELECT COUNT(*) as count FROM config WHERE key = ?').get('initialized') as any;

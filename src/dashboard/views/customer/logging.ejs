@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title %> - MPBot</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<%- include('../partials/sidebar', { currentPage: 'logging' }) %>
+
+    <div class="main-header">
+      <div>
+        <h1>📋 Logging Settings</h1>
+        <div class="breadcrumb"><%= guild.name %> / <span>Logging</span></div>
+      </div>
+    </div>
+
+    <% if (query && query.saved) { %>
+      <div class="alert alert-success">✅ Logging settings saved!</div>
+    <% } %>
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">📋 Logging Configuration</div>
+      </div>
+      <p class="card-desc">Configure which events are logged and where log messages are sent.</p>
+
+      <form method="POST" action="/customer/guild/<%= guild.id %>/logging">
+        <div class="form-group">
+          <label>Log Channel ID</label>
+          <input type="text" name="log_channel" class="form-input" value="<%= config.log_channel || '' %>" placeholder="Channel ID for logs">
+        </div>
+
+        <div class="form-group">
+          <label class="toggle-label">
+            <input type="checkbox" name="message_logs" value="1" <%= config.message_logs ? 'checked' : '' %> class="form-checkbox">
+            <span>Message Edit/Delete Logs</span>
+          </label>
+        </div>
+
+        <div class="form-group">
+          <label class="toggle-label">
+            <input type="checkbox" name="mod_logs" value="1" <%= config.mod_logs ? 'checked' : '' %> class="form-checkbox">
+            <span>Moderation Action Logs</span>
+          </label>
+        </div>
+
+        <div class="form-group">
+          <label class="toggle-label">
+            <input type="checkbox" name="member_logs" value="1" <%= config.member_logs ? 'checked' : '' %> class="form-checkbox">
+            <span>Member Join/Leave Logs</span>
+          </label>
+        </div>
+
+        <div class="form-group">
+          <label class="toggle-label">
+            <input type="checkbox" name="voice_logs" value="1" <%= config.voice_logs ? 'checked' : '' %> class="form-checkbox">
+            <span>Voice Channel Logs</span>
+          </label>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Save Settings</button>
+      </form>
+    </div>
+
+  </main>
+</div>
+</body>
+</html>

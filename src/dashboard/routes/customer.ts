@@ -904,6 +904,153 @@ customerRouter.post('/guild/:guildId/admin-roles/delete/:roleId', async (req: Re
   res.redirect(`/customer/guild/${guildId}/admin-roles?saved=1`);
 });
 
+// ==================== Logging ====================
+customerRouter.get('/guild/:guildId/logging', requireCustomer, async (req: Request, res: Response) => {
+  const guildId = String(req.params.guildId);
+  const customer = (req.session as any).customer;
+  const access = await checkGuildAccess(guildId, customer.id);
+  if (!access) return res.status(403).send('Access denied');
+
+  const config = db.prepare('SELECT * FROM logging_config WHERE guild_id = ?').get(guildId) as any || {};
+
+  res.render('customer/logging', {
+    title: 'Logging Settings',
+    user: customer,
+    guild: access.guild,
+    config,
+    guilds: res.locals.sidebarGuilds || [],
+    query: req.query,
+  });
+});
+
+customerRouter.post('/guild/:guildId/logging', requireCustomer, async (req: Request, res: Response) => {
+  const guildId = String(req.params.guildId);
+  const customer = (req.session as any).customer;
+  const access = await checkGuildAccess(guildId, customer.id);
+  if (!access) return res.status(403).send('Access denied');
+
+  const { log_channel, message_logs, mod_logs, member_logs, voice_logs } = req.body;
+  db.prepare(`INSERT INTO logging_config (guild_id, log_channel, message_logs, mod_logs, member_logs, voice_logs)
+    VALUES (?, ?, ?, ?, ?, ?)
+    ON CONFLICT(guild_id) DO UPDATE SET log_channel=?, message_logs=?, mod_logs=?, member_logs=?, voice_logs=?`).run(
+    guildId, log_channel, message_logs ? 1 : 0, mod_logs ? 1 : 0, member_logs ? 1 : 0, voice_logs ? 1 : 0,
+    log_channel, message_logs ? 1 : 0, mod_logs ? 1 : 0, member_logs ? 1 : 0, voice_logs ? 1 : 0
+  );
+  res.redirect(`/customer/guild/${guildId}/logging?saved=1`);
+});
+
+// ==================== Starboard ====================
+customerRouter.get('/guild/:guildId/starboard', requireCustomer, async (req: Request, res: Response) => {
+  const guildId = String(req.params.guildId);
+  const customer = (req.session as any).customer;
+  const access = await checkGuildAccess(guildId, customer.id);
+  if (!access) return res.status(403).send('Access denied');
+
+  const config = db.prepare('SELECT * FROM starboard_config WHERE guild_id = ?').get(guildId) as any || {};
+
+  res.render('customer/starboard', {
+    title: 'Starboard',
+    user: customer,
+    guild: access.guild,
+    config,
+    guilds: res.locals.sidebarGuilds || [],
+    query: req.query,
+  });
+});
+
+customerRouter.post('/guild/:guildId/starboard', requireCustomer, async (req: Request, res: Response) => {
+  const guildId = String(req.params.guildId);
+  const customer = (req.session as any).customer;
+  const access = await checkGuildAccess(guildId, customer.id);
+  if (!access) return res.status(403).send('Access denied');
+
+  const { channel_id, threshold, emoji } = req.body;
+  db.prepare(`INSERT INTO starboard_config (guild_id, channel_id, threshold, emoji)
+    VALUES (?, ?, ?, ?)
+    ON CONFLICT(guild_id) DO UPDATE SET channel_id=?, threshold=?, emoji=?`).run(
+    guildId, channel_id, parseInt(threshold) || 3, emoji || '⭐',
+    channel_id, parseInt(threshold) || 3, emoji || '⭐'
+  );
+  res.redirect(`/customer/guild/${guildId}/starboard?saved=1`);
+});
+
+// ==================== Auto Role ====================
+customerRouter.get('/guild/:guildId/autorole', requireCustomer, async (req: Request, res: Response) => {
+  const guildId = String(req.params.guildId);
+  const customer = (req.session as any).customer;
+  const access = await checkGuildAccess(guildId, customer.id);
+  if (!access) return res.status(403).send('Access denied');
+
+  const roles = db.prepare('SELECT * FROM auto_roles WHERE guild_id = ?').all(guildId) as any[];
+
+  res.render('customer/autorole', {
+    title: 'Auto Role',
+    user: customer,
+    guild: access.guild,
+    roles,
+    guilds: res.locals.sidebarGuilds || [],
+    query: req.query,
+  });
+});
+
+customerRouter.post('/guild/:guildId/autorole/add', requireCustomer, async (req: Request, res: Response) => {
+  const guildId = String(req.params.guildId);
+  const customer = (req.session as any).customer;
+  const access = await checkGuildAccess(guildId, customer.id);
+  if (!access) return res.status(403).send('Access denied');
+
+  const { role_id } = req.body;
+  if (role_id) {
+    db.prepare('INSERT OR IGNORE INTO auto_roles (guild_id, role_id) VALUES (?, ?)').run(guildId, role_id);
+  }
+  res.redirect(`/customer/guild/${guildId}/autorole?saved=1`);
+});
+
+customerRouter.post('/guild/:guildId/autorole/remove', requireCustomer, async (req: Request, res: Response) => {
+  const guildId = String(req.params.guildId);
+  const customer = (req.session as any).customer;
+  const access = await checkGuildAccess(guildId, customer.id);
+  if (!access) return res.status(403).send('Access denied');
+
+  const { role_id } = req.body;
+  if (role_id) {
+    db.prepare('DELETE FROM auto_roles WHERE guild_id = ? AND role_id = ?').run(guildId, role_id);
+  }
+  res.redirect(`/customer/guild/${guildId}/autorole?saved=1`);
+});
+
+// ==================== Tags ====================
+customerRouter.get('/guild/:guildId/tags', requireCustomer, async (req: Request, res: Response) => {
+  const guildId = String(req.params.guildId);
+  const customer = (req.session as any).customer;
+  const access = await checkGuildAccess(guildId, customer.id);
+  if (!access) return res.status(403).send('Access denied');
+
+  const tags = db.prepare('SELECT * FROM tags WHERE guild_id = ? ORDER BY uses DESC').all(guildId) as any[];
+
+  res.render('customer/tags', {
+    title: 'Tags',
+    user: customer,
+    guild: access.guild,
+    tags,
+    guilds: res.locals.sidebarGuilds || [],
+    query: req.query,
+  });
+});
+
+customerRouter.post('/guild/:guildId/tags/delete', requireCustomer, async (req: Request, res: Response) => {
+  const guildId = String(req.params.guildId);
+  const customer = (req.session as any).customer;
+  const access = await checkGuildAccess(guildId, customer.id);
+  if (!access) return res.status(403).send('Access denied');
+
+  const { tag_id } = req.body;
+  if (tag_id) {
+    db.prepare('DELETE FROM tags WHERE id = ? AND guild_id = ?').run(tag_id, guildId);
+  }
+  res.redirect(`/customer/guild/${guildId}/tags?saved=1`);
+});
+
 customerRouter.get('/logout', (req: Request, res: Response) => {
   (req.session as any).customer = null;
   res.redirect('/customer/login');
