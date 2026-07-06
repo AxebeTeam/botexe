@@ -4,7 +4,7 @@
   "description": "Multi-purpose Discord bot with key system & dashboard",
   "main": "dist/index.js",
   "scripts": {
-    "build": "tsc && xcopy /E /I /Y /Q \"src\\dashboard\\views\" \"dist\\dashboard\\views\\\" && xcopy /E /I /Y /Q \"src\\dashboard\\public\" \"dist\\dashboard\\public\\\"",
+    "build": "tsc && cp -r src/dashboard/views dist/dashboard/ && cp -r src/dashboard/public dist/dashboard/",
     "start": "node dist/index.js",
     "dev": "ts-node src/index.ts",
     "register": "ts-node src/bot/handlers/registerCommands.ts"
