@@ -11,7 +11,7 @@ import { customerRouter } from './routes/customer';
 import db from '../database/connection';
 
 const app = express();
-const PORT = parseInt(process.env.DASHBOARD_PORT || '3000');
+const PORT = parseInt(process.env.PORT || '3001');
 
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
@@ -89,7 +89,7 @@ export function startDashboard(client?: Client): void {
     _client = client;
     setClientGetter(() => _client);
   }
-  app.listen(PORT, () => {
+  app.listen(PORT, '0.0.0.0', () => {
     logger.success(`Dashboard running on http://localhost:${PORT}`);
   });
 }
