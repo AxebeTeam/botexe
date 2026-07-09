@@ -79,6 +79,15 @@ export async function startBot(): Promise<Client> {
     logger.success(`Commands synced to all ${guildIds.length} guilds`);
   }
 
+  // Auto-sync commands every 60 seconds
+  setInterval(async () => {
+    const currentGuilds = client.guilds.cache.map(g => g.id);
+    for (const gId of currentGuilds) {
+      await syncGuild(gId).catch(() => {});
+      await new Promise(r => setTimeout(r, 200));
+    }
+  }, 60000);
+
   return client;
 }
 
