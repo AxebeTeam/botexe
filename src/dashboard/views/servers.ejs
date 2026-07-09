@@ -1,54 +1,59 @@
 <!DOCTYPE html>
-<html lang="en" dir="ltr">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title><%= title %> - MPBot Dashboard</title>
+  <title>Servers - EXE Bot Admin</title>
   <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
-  <%- include('partials/admin-sidebar', { currentPage: 'servers' }) %>
+<%- include('partials/admin-sidebar', { currentPage: 'servers' }) %>
 
-  <div class="main-header">
-    <div>
-      <h1>Server Management</h1>
-      <div class="breadcrumb">Dashboard / <span>Servers</span></div>
+<div class="main-header">
+  <div>
+    <h1>Server Management</h1>
+    <div class="breadcrumb"><a href="/">Dashboard</a> / <span>Servers</span></div>
+  </div>
+</div>
+
+<div class="stats-row">
+  <div class="stat-card">
+    <div class="stat-icon blue">💻</div>
+    <div class="stat-body">
+      <div class="stat-value"><%= guilds.length %></div>
+      <div class="stat-label">Total Servers</div>
     </div>
   </div>
+</div>
 
-  <div class="stats-row">
-    <div class="stat-card">
-      <div class="stat-icon purple">&#x1F4BB;</div>
-      <div class="stat-body">
-        <div class="stat-value"><%= guilds.length %></div>
-        <div class="stat-label">Total Servers</div>
+<% if (query && query.error) { %>
+  <div class="alert alert-error">
+    <%= query.error === 'missing_fields' ? 'Missing required fields.' : query.error === 'invalid_key' ? 'Invalid or already used key.' : query.error === 'leave_failed' ? 'Failed to leave server.' : query.error === 'guild_not_found' ? 'Server not found in bot cache.' : 'An error occurred.' %>
+  </div>
+<% } %>
+<% if (query && query.success) { %>
+  <div class="alert alert-success">
+    <%= query.success === 'key_assigned' ? 'Key assigned successfully!' : query.success === 'left' ? 'Bot left the server.' : 'Done!' %>
+  </div>
+<% } %>
+
+<div class="card">
+  <div class="card-header">
+    <div class="card-title">Invite Bot to Server</div>
+  </div>
+  <div class="card-body">
+    <div class="form-row" style="grid-template-columns:1fr auto;align-items:end;">
+      <div class="form-group" style="margin-bottom:0;">
+        <label>Invite Link</label>
+        <input type="text" id="inviteLink" class="form-input" value="https://discord.com/oauth2/authorize?client_id=<%= clientId %>&permissions=8&scope=bot%20applications.commands" readonly>
       </div>
+      <button class="btn btn-primary" onclick="navigator.clipboard.writeText(document.getElementById('inviteLink').value);this.textContent='Copied!';setTimeout(()=>this.textContent='Copy Link',2000)">Copy Link</button>
     </div>
   </div>
+</div>
 
-  <% if (query && query.error) { %>
-    <div class="alert alert-error">
-      <%= query.error === 'missing_fields' ? 'Missing required fields.' : query.error === 'invalid_key' ? 'Invalid or already used key.' : query.error === 'leave_failed' ? 'Failed to leave server.' : query.error === 'guild_not_found' ? 'Server not found in bot cache.' : 'An error occurred.' %>
-    </div>
-  <% } %>
-  <% if (query && query.success) { %>
-    <div class="alert alert-success">
-      <%= query.success === 'key_assigned' ? 'Key assigned successfully!' : query.success === 'left' ? 'Bot left the server.' : 'Done!' %>
-    </div>
-  <% } %>
-
-  <div class="card">
-    <div class="card-header">
-      <div class="card-title">Invite Bot to Server</div>
-    </div>
-    <p class="card-desc">Send this link to your customer to add the bot to their server:</p>
-    <div class="form-row" style="grid-template-columns:1fr auto;">
-      <input type="text" id="inviteLink" value="https://discord.com/oauth2/authorize?client_id=<%= clientId %>&permissions=8&scope=bot%20applications.commands" readonly>
-      <button class="btn btn-primary" onclick="navigator.clipboard.writeText(document.getElementById('inviteLink').value);this.textContent='Copied!'">Copy Link</button>
-    </div>
-  </div>
-
-  <div class="table-wrap">
+<div class="card">
+  <div class="table-container">
     <table class="data-table">
       <thead>
         <tr>
@@ -63,19 +68,19 @@
       </thead>
       <tbody>
         <% if (guilds.length === 0) { %>
-          <tr><td colspan="7" class="empty">No servers connected yet. Use the invite link above to add the bot.</td></tr>
+          <tr><td colspan="7" class="text-muted text-center" style="padding:24px;">No servers connected yet.</td></tr>
         <% } %>
         <% guilds.forEach(g => { %>
           <tr>
             <td>
               <div style="display:flex;align-items:center;gap:8px;">
-                <% if (g.icon) { %><img src="<%= g.icon %>" style="width:32px;height:32px;border-radius:50%;"><% } %>
-                <strong><%= g.name %></strong>
+                <% if (g.icon) { %><img src="<%= g.icon %>" style="width:28px;height:28px;border-radius:50%;"><% } %>
+                <strong style="color:var(--text-1);"><%= g.name %></strong>
               </div>
             </td>
             <td><code><%= g.guild_id.substring(0, 12) %>...</code></td>
             <td>
-              <a href="/servers/lookup?user_id=<%= g.owner_id %>">
+              <a href="/servers/lookup?user_id=<%= g.owner_id %>" style="color:var(--accent);text-decoration:none;">
                 <%= g.owner_tag ? g.owner_tag.substring(0, 15) : g.owner_id.substring(0, 10) + '...' %>
               </a>
             </td>
@@ -84,50 +89,53 @@
               <% if (g.key_expired) { %>
                 <span class="badge badge-danger">Expired</span>
               <% } else if (g.has_key) { %>
-                <span class="badge badge-active"><%= g.days_left !== null ? g.days_left + 'd' : 'Active' %></span>
+                <span class="badge badge-success"><%= g.days_left !== null ? g.days_left + 'd' : 'Active' %></span>
               <% } else { %>
-                <span class="badge badge-inactive">No Key</span>
+                <span class="badge badge-warning">No Key</span>
               <% } %>
             </td>
-            <td style="font-size:0.85rem;">
+            <td class="text-muted" style="font-size:12px;">
               <%= g.key_expires ? new Date(g.key_expires).toLocaleDateString() : '-' %>
             </td>
-            <td style="display:flex;flex-direction:column;gap:4px;padding:0.5rem;">
-              <% if (g.has_key) { %>
-                <form method="POST" action="/servers/extend-key/<%= g.guild_id %>" class="inline-form small" style="display:flex;gap:4px;align-items:center;">
-                  <input type="number" name="days" value="30" min="1" max="365" style="width:50px;padding:0.2rem;">
-                  <button type="submit" class="btn btn-sm btn-success">Extend</button>
-                </form>
-                <form method="POST" action="/servers/deactivate-key/<%= g.guild_id %>" class="inline-form" onsubmit="return confirm('Deactivate this server\'s key?')">
-                  <button type="submit" class="btn btn-sm btn-warning">Deactivate</button>
-                </form>
-              <% } else { %>
-                <details>
-                  <summary class="btn btn-sm btn-success" style="cursor:pointer;">Assign Key</summary>
-                  <form method="POST" action="/servers/assign-key" style="display:flex;flex-wrap:wrap;gap:4px;margin-top:6px;">
-                    <input type="hidden" name="guild_id" value="<%= g.guild_id %>">
-                    <select name="key_id" required style="padding:0.3rem;font-size:0.8rem;width:120px;">
-                      <option value="">Select key</option>
-                      <% availableKeys.forEach(k => { %>
-                        <option value="<%= k.id %>"><%= k.key.substring(0, 16) %>..</option>
-                      <% }) %>
-                    </select>
-                    <input type="number" name="days" value="30" min="1" max="365" style="width:50px;padding:0.2rem;">
-                    <button type="submit" class="btn btn-sm btn-success">Assign</button>
+            <td>
+              <div style="display:flex;flex-direction:column;gap:4px;">
+                <% if (g.has_key) { %>
+                  <form method="POST" action="/servers/extend-key/<%= g.guild_id %>" style="display:flex;gap:4px;align-items:center;">
+                    <input type="number" name="days" value="30" min="1" max="365" class="form-input" style="width:50px;padding:4px 6px;">
+                    <button type="submit" class="btn btn-sm btn-success">Extend</button>
                   </form>
-                </details>
-              <% } %>
-              <form method="POST" action="/servers/leave/<%= g.guild_id %>" class="inline-form" onsubmit="return confirm('Make the bot leave this server? The server will be removed from the database.')">
-                <button type="submit" class="btn btn-sm btn-danger">Kick Bot</button>
-              </form>
+                  <form method="POST" action="/servers/deactivate-key/<%= g.guild_id %>" onsubmit="return confirm('Deactivate this server\'s key?')">
+                    <button type="submit" class="btn btn-sm btn-danger">Deactivate</button>
+                  </form>
+                <% } else { %>
+                  <details>
+                    <summary class="btn btn-sm btn-success" style="cursor:pointer;">Assign Key</summary>
+                    <form method="POST" action="/servers/assign-key" style="display:flex;flex-wrap:wrap;gap:4px;margin-top:6px;">
+                      <input type="hidden" name="guild_id" value="<%= g.guild_id %>">
+                      <select name="key_id" required class="form-select" style="width:120px;padding:4px 6px;font-size:11px;">
+                        <option value="">Select key</option>
+                        <% availableKeys.forEach(k => { %>
+                          <option value="<%= k.id %>"><%= k.key.substring(0, 16) %>..</option>
+                        <% }) %>
+                      </select>
+                      <input type="number" name="days" value="30" min="1" max="365" class="form-input" style="width:50px;padding:4px 6px;">
+                      <button type="submit" class="btn btn-sm btn-success">Assign</button>
+                    </form>
+                  </details>
+                <% } %>
+                <form method="POST" action="/servers/leave/<%= g.guild_id %>" onsubmit="return confirm('Make the bot leave this server?')">
+                  <button type="submit" class="btn btn-sm btn-danger">Kick Bot</button>
+                </form>
+              </div>
             </td>
           </tr>
         <% }) %>
       </tbody>
     </table>
   </div>
+</div>
 
-  </main>
+</main>
 </div>
 </body>
 </html>

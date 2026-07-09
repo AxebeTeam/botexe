@@ -1,80 +1,86 @@
 <!DOCTYPE html>
-<html lang="en" dir="ltr">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title><%= title %> - MPBot Dashboard</title>
+  <title>Commands - EXE Bot Admin</title>
   <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
-  <%- include('partials/admin-sidebar', { currentPage: 'commands' }) %>
+<%- include('partials/admin-sidebar', { currentPage: 'commands' }) %>
 
-    <div class="main-header">
-      <div class="breadcrumb">
-        <a href="/">Dashboard</a>
-        <span>/</span>
-        <span>Commands</span>
-      </div>
-      <h1><%= title %></h1>
+<div class="main-header">
+  <div>
+    <h1>Command Manager</h1>
+    <div class="breadcrumb"><a href="/">Dashboard</a> / <span>Commands</span></div>
+  </div>
+</div>
+
+<% if (query && query.error) { %>
+  <div class="alert alert-error">
+    <%= query.error === 'no_client' ? 'Bot client not available.' : query.error === 'sync_failed' ? 'Sync failed: ' + decodeURIComponent(query.msg || '') : query.error === 'no_message' ? 'Please enter a message.' : query.error === 'broadcast_failed' ? 'Broadcast failed.' : query.error === 'no_commands' ? 'No commands found.' : query.error === 'reload_failed' ? 'Reload failed.' : 'An error occurred.' %>
+  </div>
+<% } %>
+<% if (query && query.success) { %>
+  <div class="alert alert-success">
+    <%= query.success === 'synced' ? 'Commands synced! Guilds: ' + (query.guildCount || '0') + ' servers updated' : query.success === 'reloaded' ? 'Commands reloaded! (' + (query.count || '') + ' loaded)' : query.success === 'broadcast' ? 'Broadcast sent! Sent: ' + (query.sent || '0') : 'Done!' %>
+  </div>
+<% } %>
+
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;">
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title">🔄 Sync Commands</div>
     </div>
-
-    <% if (query && query.error) { %>
-      <div class="alert alert-error">
-        <%= query.error === 'no_client' ? 'Bot client is not available. Make sure the bot is running.' : query.error === 'sync_failed' ? 'Failed to sync commands: ' + decodeURIComponent(query.msg || '') : query.error === 'no_message' ? 'Please enter a message.' : query.error === 'broadcast_failed' ? 'Broadcast failed.' : query.error === 'no_commands' ? 'No commands found on disk.' : query.error === 'reload_failed' ? 'Failed to reload commands.' : 'An error occurred.' %>
-      </div>
-    <% } %>
-    <% if (query && query.success) { %>
-      <div class="alert alert-success">
-        <%= query.success === 'synced' ? 'Commands synced! Global: ' + (query.global || '0') + ' commands | Guilds: ' + (query.guildCount || '0') + ' servers updated (' + (query.guilds || '0') + ' commands each)' : query.success === 'reloaded' ? 'Commands reloaded from disk! (' + (query.count || '') + ' commands loaded)' : query.success === 'broadcast' ? 'Broadcast sent! Sent: ' + (query.sent || '0') + ', Failed: ' + (query.failed || '0') : 'Done!' %>
-      </div>
-    <% } %>
-
-    <div class="card-grid-2">
-      <div class="card">
-        <div class="card-header">
-          <div class="card-title">Sync Slash Commands</div>
-        </div>
-        <p class="card-desc">Reloads commands from disk, registers globally <strong>and</strong> instantly syncs to all servers the bot is in. Use after adding, removing, or editing commands.</p>
-        <form method="POST" action="/commands/sync" onsubmit="this.querySelector('button').disabled=true;this.querySelector('button').textContent='Working...'">
-          <button type="submit" class="btn btn-primary btn-block"> Sync & Register Commands</button>
-        </form>
-      </div>
-
-      <div class="card">
-        <div class="card-header">
-          <div class="card-title">Reload Commands Only</div>
-        </div>
-        <p class="card-desc">Just reload commands from disk without registering to Discord. Useful for testing.</p>
-        <form method="POST" action="/commands/reload" onsubmit="this.querySelector('button').disabled=true;this.querySelector('button').textContent='Reloading...'">
-          <button type="submit" class="btn btn-warning btn-block"> Reload Commands</button>
-        </form>
-      </div>
-    </div>
-
-    <div class="card">
-      <div class="card-header">
-        <div class="card-title">🔄 Fix Duplicate Commands</div>
-      </div>
-      <p class="card-desc">Remove all global commands and re-sync only to guilds. This fixes the duplicate commands issue (commands showing twice in Discord).</p>
-      <form method="POST" action="/commands/fix-duplicates" onsubmit="this.querySelector('button').disabled=true;this.querySelector('button').textContent='Fixing...'">
-        <button type="submit" class="btn btn-warning btn-block">🔧 Fix Duplicates (Remove Global)</button>
+    <div class="card-body">
+      <p class="text-muted" style="font-size:12px;margin-bottom:12px;">Reloads and registers commands to all servers.</p>
+      <form method="POST" action="/commands/sync" onsubmit="this.querySelector('button').disabled=true;this.querySelector('button').textContent='Working...'">
+        <button type="submit" class="btn btn-primary w-full" style="justify-content:center;">Sync & Register</button>
       </form>
     </div>
+  </div>
 
-    <div class="card">
-      <div class="card-header">
-        <div class="card-title">Broadcast Message</div>
-      </div>
-      <p class="card-desc">Send a message to all servers the bot is in. The message will be sent as an embed to the system channel.</p>
-      <form method="POST" action="/commands/broadcast">
-        <div class="form-group">
-          <textarea name="message" rows="4" placeholder="Enter your broadcast message..." required></textarea>
-        </div>
-        <button type="submit" class="btn btn-primary btn-block"> Send Broadcast</button>
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title">♻️ Reload Commands</div>
+    </div>
+    <div class="card-body">
+      <p class="text-muted" style="font-size:12px;margin-bottom:12px;">Reload from disk without registering.</p>
+      <form method="POST" action="/commands/reload" onsubmit="this.querySelector('button').disabled=true;this.querySelector('button').textContent='Reloading...'">
+        <button type="submit" class="btn btn-secondary w-full" style="justify-content:center;">Reload Only</button>
       </form>
     </div>
+  </div>
+</div>
 
-  </main>
+<div class="card">
+  <div class="card-header">
+    <div class="card-title">🔧 Fix Duplicate Commands</div>
+  </div>
+  <div class="card-body">
+    <p class="text-muted" style="font-size:12px;margin-bottom:12px;">Remove all global commands and re-sync to guilds only.</p>
+    <form method="POST" action="/commands/fix-duplicates" onsubmit="this.querySelector('button').disabled=true;this.querySelector('button').textContent='Fixing...'">
+      <button type="submit" class="btn btn-danger w-full" style="justify-content:center;">Fix Duplicates</button>
+    </form>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-header">
+    <div class="card-title">📢 Broadcast Message</div>
+  </div>
+  <div class="card-body">
+    <form method="POST" action="/commands/broadcast">
+      <div class="form-group">
+        <label>Message</label>
+        <textarea name="message" class="form-textarea" rows="4" placeholder="Enter broadcast message..." required></textarea>
+      </div>
+      <button type="submit" class="btn btn-primary">Send Broadcast</button>
+    </form>
+  </div>
+</div>
+
+</main>
 </div>
 </body>
 </html>

@@ -1,139 +1,119 @@
 <!DOCTYPE html>
-<html lang="en" dir="ltr">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title><%= title %> - MPBot Dashboard</title>
+  <title>Dashboard - EXE Bot Admin</title>
   <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
-  <%- include('partials/admin-sidebar', { currentPage: 'dashboard' }) %>
+<%- include('partials/admin-sidebar', { currentPage: 'dashboard' }) %>
 
-  <div class="main-header">
-    <div class="page-header">
-      <div class="breadcrumb">
-        <a href="/">Home</a>
-        <span>/</span>
-        <span>Dashboard</span>
-      </div>
-      <h1>Dashboard Overview</h1>
+<div class="main-header">
+  <div>
+    <h1>Dashboard</h1>
+    <div class="breadcrumb">Home / <span>Overview</span></div>
+  </div>
+</div>
+
+<div class="stats-row">
+  <div class="stat-card">
+    <div class="stat-icon purple">🔑</div>
+    <div class="stat-body">
+      <div class="stat-value"><%= totalKeys %></div>
+      <div class="stat-label">Total Keys</div>
     </div>
   </div>
-
-  <div class="stats-row">
-    <div class="stat-card">
-      <div class="stat-icon bg-purple">🔑</div>
-      <div class="stat-body">
-        <div class="stat-value"><%= totalKeys %></div>
-        <div class="stat-label">Total Keys</div>
-      </div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-icon bg-green">✅</div>
-      <div class="stat-body">
-        <div class="stat-value"><%= activeKeys %></div>
-        <div class="stat-label">Active Keys</div>
-      </div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-icon bg-orange">💤</div>
-      <div class="stat-body">
-        <div class="stat-value"><%= unassignedKeys %></div>
-        <div class="stat-label">Unassigned Keys</div>
-      </div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-icon bg-red">❌</div>
-      <div class="stat-body">
-        <div class="stat-value"><%= expiredKeys %></div>
-        <div class="stat-label">Expired Keys</div>
-      </div>
+  <div class="stat-card">
+    <div class="stat-icon green">✅</div>
+    <div class="stat-body">
+      <div class="stat-value"><%= activeKeys %></div>
+      <div class="stat-label">Active Keys</div>
     </div>
   </div>
-
-  <div class="stats-row">
-    <div class="stat-card">
-      <div class="stat-icon bg-blue">💻</div>
-      <div class="stat-body">
-        <div class="stat-value"><%= totalGuilds %></div>
-        <div class="stat-label">Servers</div>
-      </div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-icon bg-red">📊</div>
-      <div class="stat-body">
-        <div class="stat-value"><%= totalWarnings %></div>
-        <div class="stat-label">Warnings</div>
-      </div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-icon bg-cyan">🛡️</div>
-      <div class="stat-body">
-        <div class="stat-value"><%= guildsWithAutomod %></div>
-        <div class="stat-label">AutoMod Configs</div>
-      </div>
+  <div class="stat-card">
+    <div class="stat-icon orange">💤</div>
+    <div class="stat-body">
+      <div class="stat-value"><%= unassignedKeys %></div>
+      <div class="stat-label">Unassigned</div>
     </div>
   </div>
-
-  <div class="stats-row">
-    <div class="stat-card">
-      <div class="stat-icon bg-blue">🎫</div>
-      <div class="stat-body">
-        <div class="stat-value"><%= openTickets %> / <%= totalTickets %></div>
-        <div class="stat-label">Tickets Open/Total</div>
-      </div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-icon bg-purple">🎉</div>
-      <div class="stat-body">
-        <div class="stat-value"><%= activeGiveaways %> / <%= totalGiveaways %></div>
-        <div class="stat-label">Giveaways Active/Total</div>
-      </div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-icon bg-green">💰</div>
-      <div class="stat-body">
-        <div class="stat-value"><%= economyUsers %></div>
-        <div class="stat-label">Economy Users</div>
-      </div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-icon bg-orange">📈</div>
-      <div class="stat-body">
-        <div class="stat-value"><%= leveledUsers %></div>
-        <div class="stat-label">Leveled Users</div>
-      </div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-icon bg-cyan">🎭</div>
-      <div class="stat-body">
-        <div class="stat-value"><%= totalReactionRoles %></div>
-        <div class="stat-label">Reaction Roles</div>
-      </div>
+  <div class="stat-card">
+    <div class="stat-icon red">❌</div>
+    <div class="stat-body">
+      <div class="stat-value"><%= expiredKeys %></div>
+      <div class="stat-label">Expired</div>
     </div>
   </div>
+</div>
 
-  <div class="card">
-    <div class="card-header">
-      <h3 class="card-title">Quick Actions</h3>
-    </div>
-    <div class="action-grid">
-      <a href="/keys" class="server-card">
-        <h3>🔑 Manage Keys</h3>
-        <p>Create, extend, delete keys. Assign keys to servers.</p>
-      </a>
-      <a href="/servers" class="server-card">
-        <h3>💻 Manage Servers</h3>
-        <p>View connected servers, assign keys, deactivate, extend.</p>
-      </a>
-      <a href="/servers/lookup" class="server-card">
-        <h3>🔍 User Lookup</h3>
-        <p>Search users by ID, find what servers they are in.</p>
-      </a>
+<div class="stats-row">
+  <div class="stat-card">
+    <div class="stat-icon blue">💻</div>
+    <div class="stat-body">
+      <div class="stat-value"><%= totalGuilds %></div>
+      <div class="stat-label">Servers</div>
     </div>
   </div>
+  <div class="stat-card">
+    <div class="stat-icon red">📊</div>
+    <div class="stat-body">
+      <div class="stat-value"><%= totalWarnings %></div>
+      <div class="stat-label">Warnings</div>
+    </div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon purple">🎫</div>
+    <div class="stat-body">
+      <div class="stat-value"><%= openTickets %> / <%= totalTickets %></div>
+      <div class="stat-label">Tickets</div>
+    </div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon green">💰</div>
+    <div class="stat-body">
+      <div class="stat-value"><%= economyUsers %></div>
+      <div class="stat-label">Economy</div>
+    </div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon orange">📈</div>
+    <div class="stat-body">
+      <div class="stat-value"><%= leveledUsers %></div>
+      <div class="stat-label">Leveled</div>
+    </div>
+  </div>
+</div>
 
-  </main>
+<div class="card">
+  <div class="card-header">
+    <div class="card-title">🚀 Quick Actions</div>
+  </div>
+  <div class="server-grid" style="padding:16px;">
+    <a href="/keys" class="server-card">
+      <div style="font-size:28px;margin-bottom:8px;">🔑</div>
+      <div class="server-name">Manage Keys</div>
+      <div class="server-meta"><span>Create, extend, delete</span></div>
+    </a>
+    <a href="/servers" class="server-card">
+      <div style="font-size:28px;margin-bottom:8px;">💻</div>
+      <div class="server-name">Manage Servers</div>
+      <div class="server-meta"><span>View, assign, deactivate</span></div>
+    </a>
+    <a href="/servers/lookup" class="server-card">
+      <div style="font-size:28px;margin-bottom:8px;">🔍</div>
+      <div class="server-name">User Lookup</div>
+      <div class="server-meta"><span>Search by ID</span></div>
+    </a>
+    <a href="/commands" class="server-card">
+      <div style="font-size:28px;margin-bottom:8px;">🔧</div>
+      <div class="server-name">Commands</div>
+      <div class="server-meta"><span>Sync & reload</span></div>
+    </a>
+  </div>
+</div>
+
+</main>
 </div>
 </body>
 </html>

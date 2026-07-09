@@ -1,125 +1,130 @@
 <!DOCTYPE html>
-<html lang="en" dir="ltr">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title><%= title %> - MPBot Dashboard</title>
+  <title>Keys - EXE Bot Admin</title>
   <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
-  <%- include('partials/admin-sidebar', { currentPage: 'keys' }) %>
+<%- include('partials/admin-sidebar', { currentPage: 'keys' }) %>
 
-    <div class="main-header">
-      <nav class="breadcrumb">
-        <a href="/">Dashboard</a> / <span>Keys</span>
-      </nav>
-      <h1>Key Management</h1>
+<div class="main-header">
+  <div>
+    <h1>Key Management</h1>
+    <div class="breadcrumb"><a href="/">Dashboard</a> / <span>Keys</span></div>
+  </div>
+</div>
+
+<div class="stats-row">
+  <div class="stat-card">
+    <div class="stat-icon purple">🔑</div>
+    <div class="stat-body">
+      <div class="stat-value"><%= total %></div>
+      <div class="stat-label">Total Keys</div>
     </div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon green">✅</div>
+    <div class="stat-body">
+      <div class="stat-value"><%= active %></div>
+      <div class="stat-label">Active Keys</div>
+    </div>
+  </div>
+</div>
 
-    <div class="stats-row">
-      <div class="stat-card">
-        <div class="stat-icon">🔑</div>
-        <div class="stat-info">
-          <h3><%= total %></h3>
-          <p>Total Keys</p>
+<div class="card">
+  <div class="card-header">
+    <div class="card-title">Create New Key</div>
+  </div>
+  <div class="card-body">
+    <form method="POST" action="/keys/create">
+      <div class="form-row">
+        <div class="form-group">
+          <label>Duration (days)</label>
+          <input type="number" name="days" class="form-input" value="30" min="1" max="365" required>
+        </div>
+        <div class="form-group" style="display:flex;align-items:flex-end;">
+          <button type="submit" class="btn btn-success">Generate Key</button>
         </div>
       </div>
-      <div class="stat-card">
-        <div class="stat-icon">✅</div>
-        <div class="stat-info">
-          <h3><%= active %></h3>
-          <p>Active Keys</p>
-        </div>
-      </div>
-    </div>
+    </form>
+  </div>
+</div>
 
-    <div class="card">
-      <div class="card-header">
-        <h3 class="card-title">Create New Key</h3>
-      </div>
-      <div class="card-body">
-        <form method="POST" action="/keys/create">
-          <div class="form-row">
-            <div class="form-group">
-              <label>Duration (days)</label>
-              <input type="number" name="days" value="30" min="1" max="365" required>
-            </div>
-            <div class="form-group" style="display:flex;align-items:flex-end;">
-              <button type="submit" class="btn btn-success">Generate Key</button>
-            </div>
-          </div>
-        </form>
-      </div>
-    </div>
+<div style="display:flex;gap:8px;margin-bottom:16px;">
+  <a href="/keys?filter=all" class="btn <%= filter === 'all' ? 'btn-primary' : 'btn-secondary' %>">All</a>
+  <a href="/keys?filter=active" class="btn <%= filter === 'active' ? 'btn-primary' : 'btn-secondary' %>">Active</a>
+  <a href="/keys?filter=inactive" class="btn <%= filter === 'inactive' ? 'btn-primary' : 'btn-secondary' %>">Unassigned</a>
+  <a href="/keys?filter=expired" class="btn <%= filter === 'expired' ? 'btn-primary' : 'btn-secondary' %>">Expired</a>
+</div>
 
-    <div class="filter-bar">
-      <a href="/keys?filter=all" class="btn <%= filter === 'all' ? 'btn-active' : '' %>">All</a>
-      <a href="/keys?filter=active" class="btn <%= filter === 'active' ? 'btn-active' : '' %>">Active</a>
-      <a href="/keys?filter=inactive" class="btn <%= filter === 'inactive' ? 'btn-active' : '' %>">Unassigned</a>
-      <a href="/keys?filter=expired" class="btn <%= filter === 'expired' ? 'btn-active' : '' %>">Expired</a>
-    </div>
-
-    <div class="table-wrap">
-      <table class="data-table">
-        <thead>
+<div class="card">
+  <div class="table-container">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Key</th>
+          <th>Status</th>
+          <th>Server</th>
+          <th>Activated By</th>
+          <th>Created</th>
+          <th>Expires</th>
+          <th>Days Left</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% if (keys.length === 0) { %>
+          <tr><td colspan="8" class="text-muted text-center" style="padding:24px;">No keys found.</td></tr>
+        <% } %>
+        <% keys.forEach(k => { %>
           <tr>
-            <th>Key</th>
-            <th>Status</th>
-            <th>Server</th>
-            <th>Activated By</th>
-            <th>Created</th>
-            <th>Expires</th>
-            <th>Days Left</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          <% if (keys.length === 0) { %>
-            <tr><td colspan="8" class="empty">No keys found.</td></tr>
-          <% } %>
-          <% keys.forEach(k => { %>
-            <tr>
-              <td><code><%= k.key %></code></td>
-              <td>
-                <% if (k.is_expired) { %>
-                  <span class="badge badge-expired">Expired</span>
-                <% } else if (k.is_active) { %>
-                  <span class="badge badge-active">Active</span>
-                <% } else { %>
-                  <span class="badge badge-inactive">Unassigned</span>
-                <% } %>
-              </td>
-              <td>
-                <% if (k.guild_id) { %>
-                  <code><%= k.guild_id.substring(0, 12) %>...</code>
-                <% } else { %>
-                  <span style="color:#8b949e;">-</span>
-                <% } %>
-              </td>
-              <td><%= k.activated_by ? k.activated_by.substring(0, 12) + '...' : '-' %></td>
-              <td><%= k.created_at ? new Date(k.created_at).toLocaleDateString() : '-' %></td>
-              <td><%= k.expires_at ? new Date(k.expires_at).toLocaleDateString() : '-' %></td>
-              <td><%= k.days_left !== null ? k.days_left + 'd' : '-' %></td>
-              <td class="actions-cell">
-                <form method="POST" action="/keys/extend/<%= k.id %>" class="inline-form small">
-                  <input type="number" name="days" value="30" min="1" max="365" style="width: 60px;">
-                  <button type="submit" class="btn btn-sm btn-extend" title="Extend">Extend</button>
+            <td><code><%= k.key %></code></td>
+            <td>
+              <% if (k.is_expired) { %>
+                <span class="badge badge-danger">Expired</span>
+              <% } else if (k.is_active) { %>
+                <span class="badge badge-success">Active</span>
+              <% } else { %>
+                <span class="badge badge-warning">Unassigned</span>
+              <% } %>
+            </td>
+            <td>
+              <% if (k.guild_id) { %>
+                <code><%= k.guild_id.substring(0, 12) %>...</code>
+              <% } else { %>
+                <span class="text-muted">-</span>
+              <% } %>
+            </td>
+            <td class="text-muted"><%= k.activated_by ? k.activated_by.substring(0, 12) + '...' : '-' %></td>
+            <td class="text-muted"><%= k.created_at ? new Date(k.created_at).toLocaleDateString() : '-' %></td>
+            <td class="text-muted"><%= k.expires_at ? new Date(k.expires_at).toLocaleDateString() : '-' %></td>
+            <td><%= k.days_left !== null ? k.days_left + 'd' : '-' %></td>
+            <td>
+              <div style="display:flex;gap:4px;flex-wrap:wrap;">
+                <form method="POST" action="/keys/extend/<%= k.id %>" style="display:flex;gap:4px;align-items:center;">
+                  <input type="number" name="days" value="30" min="1" max="365" class="form-input" style="width:60px;padding:4px 8px;">
+                  <button type="submit" class="btn btn-sm btn-success">Extend</button>
                 </form>
                 <% if (k.is_active && k.guild_id) { %>
-                  <form method="POST" action="/keys/deactivate/<%= k.id %>" class="inline-form">
-                    <button type="submit" class="btn btn-sm btn-warn" title="Deactivate">Deactivate</button>
+                  <form method="POST" action="/keys/deactivate/<%= k.id %>">
+                    <button type="submit" class="btn btn-sm btn-danger">Deactivate</button>
                   </form>
                 <% } %>
-                <form method="POST" action="/keys/delete/<%= k.id %>" class="inline-form" onsubmit="return confirm('Delete this key?')">
-                  <button type="submit" class="btn btn-sm btn-danger" title="Delete">Delete</button>
+                <form method="POST" action="/keys/delete/<%= k.id %>" onsubmit="return confirm('Delete this key?')">
+                  <button type="submit" class="btn btn-sm btn-danger">Delete</button>
                 </form>
-              </td>
-            </tr>
-          <% }) %>
-        </tbody>
-      </table>
-    </div>
-  </main>
+              </div>
+            </td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+</main>
 </div>
 </body>
 </html>

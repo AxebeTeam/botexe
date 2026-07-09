@@ -1,92 +1,100 @@
 <!DOCTYPE html>
-<html lang="en" dir="ltr">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title><%= title %> - MPBot Dashboard</title>
+  <title>User Lookup - EXE Bot Admin</title>
   <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
-  <%- include('partials/admin-sidebar', { currentPage: 'lookup' }) %>
+<%- include('partials/admin-sidebar', { currentPage: 'lookup' }) %>
 
-    <div class="main-header">
-      <div>
-        <h1>User Lookup</h1>
-        <div class="breadcrumb"><a href="/">Dashboard</a> / <span>User Lookup</span></div>
-      </div>
-    </div>
+<div class="main-header">
+  <div>
+    <h1>User Lookup</h1>
+    <div class="breadcrumb"><a href="/">Dashboard</a> / <span>User Lookup</span></div>
+  </div>
+</div>
 
-    <div class="card">
-      <div class="card-header">
-        <div class="card-title">Search Discord User by ID</div>
-      </div>
-      <form method="GET" action="/servers/lookup" class="form-row" style="align-items:end;">
-        <div class="form-group" style="flex:1;margin-bottom:0;">
+<div class="card">
+  <div class="card-header">
+    <div class="card-title">Search Discord User</div>
+  </div>
+  <div class="card-body">
+    <form method="GET" action="/servers/lookup">
+      <div class="form-row" style="align-items:end;">
+        <div class="form-group" style="margin-bottom:0;">
           <label for="user_id">Discord User ID</label>
-          <input type="text" name="user_id" id="user_id" value="<%= userId %>" placeholder="Enter Discord User ID" required>
+          <input type="text" name="user_id" id="user_id" class="form-input" value="<%= userId %>" placeholder="Enter Discord User ID" required>
         </div>
-        <button type="submit" class="btn btn-primary" style="height:fit-content;">Search</button>
-      </form>
-    </div>
-
-    <% if (userInfo) { %>
-      <div class="card">
-        <div class="card-header">
-          <div class="card-title">
-            <img src="<%= userInfo.avatar %>" style="width:32px;height:32px;border-radius:50%;">
-            <span><%= userInfo.tag %></span>
-            <% if (userInfo.bot) { %><span class="badge badge-active">Bot</span><% } %>
-          </div>
-        </div>
-        <p style="color:var(--text-secondary);font-size:.85rem;margin-bottom:0;">
-          <code><%= userInfo.id %></code> &middot; Account created: <%= userInfo.createdAt.toLocaleDateString() %>
-        </p>
+        <button type="submit" class="btn btn-primary">Search</button>
       </div>
+    </form>
+  </div>
+</div>
 
-      <h2 style="margin-bottom:1rem;font-size:1.1rem;">Servers (<%= userGuilds.length %>)</h2>
-
-      <% if (userGuilds.length === 0) { %>
-        <div class="table-wrap">
-          <div class="empty-state">
-            <div class="empty-icon">📭</div>
-            <h3>No Servers Found</h3>
-            <p>User is not in any server with the bot.</p>
-          </div>
+<% if (userInfo) { %>
+  <div class="card">
+    <div class="card-body" style="display:flex;align-items:center;gap:16px;">
+      <img src="<%= userInfo.avatar %>" style="width:48px;height:48px;border-radius:50%;border:2px solid var(--border);">
+      <div>
+        <div style="font-size:16px;font-weight:700;color:var(--text-1);display:flex;align-items:center;gap:8px;">
+          <%= userInfo.tag %>
+          <% if (userInfo.bot) { %><span class="badge badge-info">Bot</span><% } %>
         </div>
-      <% } else { %>
-        <div class="table-wrap">
-          <table class="data-table">
-            <thead>
+        <div class="text-muted" style="font-size:12px;">
+          <code><%= userInfo.id %></code> · Created: <%= userInfo.createdAt.toLocaleDateString() %>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <h2 style="font-size:16px;font-weight:700;color:var(--text-1);margin-bottom:12px;">Servers (<%= userGuilds.length %>)</h2>
+
+  <% if (userGuilds.length === 0) { %>
+    <div class="card">
+      <div class="card-body text-center text-muted" style="padding:32px;">
+        <div style="font-size:32px;margin-bottom:8px;">📭</div>
+        <p>User is not in any server with the bot.</p>
+      </div>
+    </div>
+  <% } else { %>
+    <div class="card">
+      <div class="table-container">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Server</th>
+              <th>ID</th>
+              <th>Role</th>
+              <th>Joined</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% userGuilds.forEach(g => { %>
               <tr>
-                <th>Server</th>
-                <th>ID</th>
-                <th>Role</th>
-                <th>Joined</th>
+                <td>
+                  <div style="display:flex;align-items:center;gap:8px;">
+                    <% if (g.icon) { %><img src="<%= g.icon %>" style="width:24px;height:24px;border-radius:50%;"><% } %>
+                    <strong style="color:var(--text-1);"><%= g.name %></strong>
+                    <% if (g.isOwner) { %><span class="badge badge-success">Owner</span><% } %>
+                  </div>
+                </td>
+                <td><code><%= g.id.substring(0, 15) %>...</code></td>
+                <td><%= g.isOwner ? 'Server Owner' : 'Member' %></td>
+                <td class="text-muted"><%= g.joinedAt ? new Date(g.joinedAt).toLocaleDateString() : '-' %></td>
               </tr>
-            </thead>
-            <tbody>
-              <% userGuilds.forEach(g => { %>
-                <tr>
-                  <td>
-                    <div style="display:flex;align-items:center;gap:8px;">
-                      <% if (g.icon) { %><img src="<%= g.icon %>" style="width:24px;height:24px;border-radius:50%;"><% } %>
-                      <strong><%= g.name %></strong>
-                      <% if (g.isOwner) { %><span class="badge badge-active">Owner</span><% } %>
-                    </div>
-                  </td>
-                  <td><code><%= g.id.substring(0, 15) %>...</code></td>
-                  <td><%= g.isOwner ? 'Server Owner' : 'Member' %></td>
-                  <td><%= g.joinedAt ? new Date(g.joinedAt).toLocaleDateString() : '-' %></td>
-                </tr>
-              <% }) %>
-            </tbody>
-          </table>
-        </div>
-      <% } %>
-    <% } else if (userId && !userInfo) { %>
-      <div class="alert alert-error">User not found. Make sure the user shares a server with the bot.</div>
-    <% } %>
-  </main>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  <% } %>
+<% } else if (userId && !userInfo) { %>
+  <div class="alert alert-error">User not found. Make sure the user shares a server with the bot.</div>
+<% } %>
+
+</main>
 </div>
 </body>
 </html>
