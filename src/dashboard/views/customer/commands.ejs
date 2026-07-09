@@ -3,57 +3,60 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title><%= title %> - MPBot</title>
+  <title><%= title %> - EXE Bot</title>
   <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
 <%- include('../partials/sidebar', { currentPage: 'commands' }) %>
 
-    <% if (query && query.saved) { %>
-      <div class="alert" style="background:#23863633;color:#3fb950;border:1px solid #238636;padding:1rem;border-radius:8px;margin-bottom:1rem;">Saved & synced to server!</div>
-    <% } %>
+<% if (query && query.saved) { %>
+  <div class="alert alert-success">✅ Saved & synced to server!</div>
+<% } %>
 
-    <div class="page-header">
-      <div style="display:flex;align-items:center;gap:1rem;">
-        <% if (guild.icon) { %><img src="<%= guild.icon %>" style="width:40px;height:40px;border-radius:50%;"><% } %>
-        <h1>Command Manager - <%= guild.name %></h1>
-      </div>
-    </div>
+<div class="page-header">
+  <h1>
+    <% if (guild.icon) { %><img src="<%= guild.icon %>" style="width:32px;height:32px;border-radius:50%;"><% } %>
+    Command Manager
+  </h1>
+</div>
 
-    <p style="color:#8b949e;margin-bottom:1.5rem;">Toggle commands on/off for this server. Disabled commands will not appear in Discord.</p>
+<p class="text-muted" style="margin-bottom:16px;font-size:13px;">Toggle commands on/off for this server. Disabled commands will not appear in Discord.</p>
 
-    <form method="POST" action="/customer/guild/<%= guild.id %>/commands/save">
-      <div class="table-container">
-        <table class="data-table">
-          <thead>
+<form method="POST" action="/customer/guild/<%= guild.id %>/commands/save">
+  <div class="card">
+    <div class="table-container">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th style="width:50px;">On</th>
+            <th>Command</th>
+            <th>Category</th>
+            <th>Description</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% commands.forEach(cmd => { %>
             <tr>
-              <th style="width:40px;">On</th>
-              <th>Command</th>
-              <th>Category</th>
-              <th>Description</th>
+              <td>
+                <input type="hidden" name="enabled[<%= cmd.name %>]" value="0">
+                <input type="checkbox" name="enabled[<%= cmd.name %>]" value="1" <%= cmd.enabled ? 'checked' : '' %> class="form-checkbox">
+              </td>
+              <td><code><%= cmd.name %></code></td>
+              <td><span class="badge badge-info"><%= cmd.category %></span></td>
+              <td class="text-muted" style="font-size:12px;"><%= cmd.description %></td>
             </tr>
-          </thead>
-          <tbody>
-            <% commands.forEach(cmd => { %>
-              <tr>
-                <td>
-                  <input type="hidden" name="enabled[<%= cmd.name %>]" value="0">
-                  <input type="checkbox" name="enabled[<%= cmd.name %>]" value="1" <%= cmd.enabled ? 'checked' : '' %> style="width:18px;height:18px;cursor:pointer;">
-                </td>
-                <td><code><%= cmd.name %></code></td>
-                <td><span class="badge badge-active"><%= cmd.category %></span></td>
-                <td style="color:#8b949e;font-size:0.85rem;"><%= cmd.description %></td>
-              </tr>
-            <% }) %>
-          </tbody>
-        </table>
-      </div>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+  </div>
 
-      <div style="margin-top:1.5rem;">
-        <button type="submit" class="btn btn-primary">Save & Sync to Server</button>
-      </div>
-    </form>
-  </main>
+  <div style="margin-top:16px;">
+    <button type="submit" class="btn btn-primary">💾 Save & Sync to Server</button>
+  </div>
+</form>
+
+</main>
 </div>
 </body>
 </html>

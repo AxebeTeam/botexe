@@ -1,7 +1,7 @@
 <div class="app-layout">
   <aside class="sidebar">
     <div class="sidebar-brand">
-      <h2>MPBot</h2>
+      <h2>EXE Bot</h2>
       <small>Multi-Purpose Bot</small>
     </div>
 
@@ -17,10 +17,10 @@
 
     <div class="server-selector">
       <select onchange="if(this.value)window.location='/customer/guild/'+this.value">
-        <option value="">— Server Quick Switch —</option>
+        <option value="">Quick Switch Server...</option>
         <% var sidebarGuilds = typeof locals.sidebarGuilds !== 'undefined' ? locals.sidebarGuilds : (typeof guilds !== 'undefined' ? guilds : []); %>
-          <% if (sidebarGuilds && sidebarGuilds.length > 0) { %>
-            <% sidebarGuilds.forEach(g => { %>
+        <% if (sidebarGuilds && sidebarGuilds.length > 0) { %>
+          <% sidebarGuilds.forEach(g => { %>
             <option value="<%= g.id %>" <%= typeof guild !== 'undefined' && guild && g.id === guild.id ? 'selected' : '' %>><%= g.name %></option>
           <% }) %>
         <% } %>
@@ -28,13 +28,13 @@
     </div>
 
     <nav class="sidebar-nav">
-      <div class="nav-section">Overview</div>
+      <div class="nav-section">Navigation</div>
       <a href="/customer/dashboard" class="<%= currentPage === 'dashboard' ? 'active' : '' %>">
         <span class="nav-icon">📊</span> Dashboard
       </a>
 
       <% if (typeof guild !== 'undefined' && guild) { %>
-        <div class="nav-section" style="margin-top:.8rem;"><%= guild.name %></div>
+        <div class="nav-section">Management</div>
         <a href="/customer/guild/<%= guild.id %>" class="<%= currentPage === 'server' ? 'active' : '' %>">
           <span class="nav-icon">⚙️</span> Overview
         </a>
@@ -59,7 +59,7 @@
         <a href="/customer/guild/<%= guild.id %>/admin-roles" class="<%= currentPage === 'admin-roles' ? 'active' : '' %>">
           <span class="nav-icon">👑</span> Admin Roles
         </a>
-        <div class="nav-section" style="margin-top:.8rem;">Systems</div>
+        <div class="nav-section">Systems</div>
         <a href="/customer/guild/<%= guild.id %>/logging" class="<%= currentPage === 'logging' ? 'active' : '' %>">
           <span class="nav-icon">📋</span> Logging
         </a>
@@ -82,7 +82,7 @@
     </nav>
 
     <div class="sidebar-footer">
-      <a href="/customer/logout"><span>🚪</span> Logout</a>
+      <a href="/customer/logout">🚪 Logout</a>
     </div>
   </aside>
 
